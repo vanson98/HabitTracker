@@ -1,0 +1,14 @@
+.habit-ctn {
+    border-bottom: 1px dashed black;
+    margin-bottom: 34px;
+}
+.habit-header{
+    display: flex;
+    align-items: center;
+}
+.habit-header>h3{
+    flex-grow: 1;
+}
+.habit-header>.edit-habit-btn{
+    width: 100px;
+}

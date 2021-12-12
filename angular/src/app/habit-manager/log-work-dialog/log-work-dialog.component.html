@@ -1,0 +1,38 @@
+<form autocomplete="off" #createHabitForm="ngForm" (ngSubmit)="logWork()">
+  <abp-modal-header
+    [title]="'Log work'"
+    (onCloseClick)="bsModalRef.hide()"
+  ></abp-modal-header>
+  <div class="modal-body">
+    <div class="form-group row required" *ngIf="logType == 0">
+      <label for="timeLog"> Số phút đã làm </label>
+      <input
+        type="number"
+        class="form-control"
+        name="timeLog"
+        id="timeLog"
+        [min]="0"
+        [max]="timeGoal"
+        required
+        [(ngModel)]="workLog.timeLog"
+        #timeLogModel="ngModel"
+        #timeLogEl
+      />
+      <abp-validation-summary
+        [control]="timeLogModel"
+        [controlEl]="timeLogEl"
+      ></abp-validation-summary>
+    </div>
+    <div>
+      <mat-form-field class="example-full-width" appearance="fill">
+        <mat-label>Số phút</mat-label>
+        <input matInput placeholder="Nhập số phút" type="number">
+      </mat-form-field>
+    </div>
+  </div>
+  <abp-modal-footer
+    [cancelDisabled]="saving"
+    [saveDisabled]="!createHabitForm.form.valid || saving"
+    (onCancelClick)="bsModalRef.hide()"
+  ></abp-modal-footer>
+</form>

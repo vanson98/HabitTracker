@@ -1,0 +1,62 @@
+<form
+  class="form-horizontal"
+  autocomplete="off"
+  #createHabitForm="ngForm"
+  (ngSubmit)="save()"
+>
+  <abp-modal-header
+    [title]="habitId > 0 ? 'Edit Habit' : 'Create Habit'"
+    (onCloseClick)="bsModalRef.hide()"
+  ></abp-modal-header>
+  <div class="modal-body">
+    <div class="form-group row required">
+      <label class="col-md-3 col-form-label" for="habitName">
+        Habit Name
+      </label>
+      <div class="col-md-9">
+        <input
+          type="text"
+          class="form-control"
+          name="habitName"
+          id="habitName"
+          minlength="2"
+          maxlength="500"
+          required
+          [(ngModel)]="habitDto.name"
+          #habitNameModel="ngModel"
+          #habitNameEl
+        />
+        <abp-validation-summary
+          [control]="habitNameModel"
+          [controlEl]="habitNameEl"
+        ></abp-validation-summary>
+      </div>
+    </div>
+    <div class="form-group row required">
+      <label class="col-md-3 col-form-label" for="habitGoal">
+        Goal (600000 phút = 10000 giờ)
+      </label>
+      <div class="col-md-9">
+        <input
+          type="number"
+          class="form-control"
+          name="habitGoal"
+          id="habitGoal"
+          required
+          [(ngModel)]="habitDto.timeGoal"
+          #habitGoalModel="ngModel"
+          #habitGoalEl
+        />
+        <abp-validation-summary
+          [control]="habitGoalModel"
+          [controlEl]="habitGoalEl"
+        ></abp-validation-summary>
+      </div>
+    </div>
+  </div>
+  <abp-modal-footer
+    [cancelDisabled]="saving"
+    [saveDisabled]="!createHabitForm.form.valid || saving"
+    (onCancelClick)="bsModalRef.hide()"
+  ></abp-modal-footer>
+</form>

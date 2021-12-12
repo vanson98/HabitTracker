@@ -1,0 +1,24 @@
+<div [@routerTransition]>
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-6">
+                    <h1>Habit Manager</h1>
+                </div>
+                <div class="col-6 text-right">
+                    <a href="javascript:;" class="btn bg-blue" (click)="createHabit()">
+                        <i class="fa fa-plus-square"></i>
+                        Create
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content px-2">
+        <div class="container-fluid">
+            <div class="card p-3">
+               <app-habit *ngFor="let habit of habits" [habit-dto]="habit" (onEditHabitBtnClick)="editHabit($event)" ></app-habit>
+            </div>
+        </div>
+    </section>
+</div>

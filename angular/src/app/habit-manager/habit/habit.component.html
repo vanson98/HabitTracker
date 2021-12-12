@@ -1,0 +1,8 @@
+<div class="habit-ctn">
+    <div class="habit-header">
+        <h3 class="habit-name">{{habitDto.name}}</h3>
+        <button class="btn btn-primary mr-2" (click)="showLogWorkDialog(habitDto.id,habitDto.habitLogType,habitDto.timeGoal)">Log work</button>
+        <button class="btn btn-primary edit-habit-btn" (click)="editHabit()">Sửa</button>
+    </div>
+    <span>Process</span>
+</div>
