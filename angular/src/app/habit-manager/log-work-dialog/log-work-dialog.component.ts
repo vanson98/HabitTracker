@@ -1,7 +1,13 @@
-import { HabitLogType } from './../../../shared/service-proxies/service-proxies';
+import {
+  HabitLogStatus,
+  HabitLogType,
+  HabitServiceProxy,
+} from "./../../../shared/service-proxies/service-proxies";
 import { Component, OnInit } from "@angular/core";
 import { LogWorkInputDto } from "@shared/service-proxies/service-proxies";
 import { BsModalRef } from "ngx-bootstrap/modal";
+import * as moment from "moment";
+import { NotifyService } from "abp-ng2-module";
 
 @Component({
   selector: "app-log-work-dialog",
@@ -10,19 +16,33 @@ import { BsModalRef } from "ngx-bootstrap/modal";
 })
 export class LogWorkDialogComponent implements OnInit {
   saving = false;
-  habitId : number;
-  logType : HabitLogType;
-  timeGoal: number;
-  workLog : LogWorkInputDto;
+  habitId: number;
+  logType: HabitLogType;
+  workLog: LogWorkInputDto;
+  workLogStatus: boolean = true;
+  dateLogData: Date = new Date();
 
-  constructor(public bsModalRef: BsModalRef) {}
+  constructor(public bsModalRef: BsModalRef,private _habitService: HabitServiceProxy, public notify: NotifyService) {}
 
   ngOnInit(): void {
     this.workLog = new LogWorkInputDto();
     this.workLog.habitId = this.habitId;
   }
 
-  logWork(){
-    console.log(this.workLog);
+  logWork() {
+    this.saving = true;
+    this.workLog.status = this.workLogStatus
+      ? HabitLogStatus._1
+      : HabitLogStatus._0;
+    this.workLog.dateLog = moment(this.dateLogData);
+    this._habitService.logWork(this.workLog).subscribe((res)=>{
+      if(res.statusCode == 200){
+        this.notify.success(res.message);
+      }else{
+        this.notify.error(res.message);
+      }
+      this.saving  = false;
+      this.bsModalRef.hide();
+    });
   }
 }

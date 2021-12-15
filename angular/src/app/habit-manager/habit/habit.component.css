@@ -1,6 +1,7 @@
 .habit-ctn {
-    border-bottom: 1px dashed black;
     margin-bottom: 34px;
+    padding: 20px 10px;
+    line-height: 2;
 }
 .habit-header{
     display: flex;
@@ -11,4 +12,23 @@
 }
 .habit-header>.edit-habit-btn{
     width: 100px;
+}
+.progress-ctn{
+    display: flex;
+    align-items: center;
+    margin-top: 2px;
+}
+.progress{
+    height: 9px;
+}
+.detail-chart-ctn{
+    display: flex;
+    margin-top: 10px;
+}
+.detail-chart-ctn>div{
+    padding: 10px;
+}
+.bar-chart{
+    padding: 10px;
+    border-left: 1px solid #d2d2d2;
 }

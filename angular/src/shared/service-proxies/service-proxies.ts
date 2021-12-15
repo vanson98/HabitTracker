@@ -397,7 +397,7 @@ export class HabitServiceProxy {
      * @param body (optional) 
      * @return Success
      */
-    logWork(body: LogWorkInputDto | undefined): Observable<boolean> {
+    logWork(body: LogWorkInputDto | undefined): Observable<BaseReponseDto> {
         let url_ = this.baseUrl + "/api/services/app/Habit/LogWork";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -420,14 +420,14 @@ export class HabitServiceProxy {
                 try {
                     return this.processLogWork(<any>response_);
                 } catch (e) {
-                    return <Observable<boolean>><any>_observableThrow(e);
+                    return <Observable<BaseReponseDto>><any>_observableThrow(e);
                 }
             } else
-                return <Observable<boolean>><any>_observableThrow(response_);
+                return <Observable<BaseReponseDto>><any>_observableThrow(response_);
         }));
     }
 
-    protected processLogWork(response: HttpResponseBase): Observable<boolean> {
+    protected processLogWork(response: HttpResponseBase): Observable<BaseReponseDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -438,8 +438,7 @@ export class HabitServiceProxy {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                result200 = resultData200 !== undefined ? resultData200 : <any>null;
-    
+            result200 = BaseReponseDto.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
@@ -447,7 +446,75 @@ export class HabitServiceProxy {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<boolean>(<any>null);
+        return _observableOf<BaseReponseDto>(<any>null);
+    }
+
+    /**
+     * @param habitId (optional) 
+     * @param year (optional) 
+     * @return Success
+     */
+    getAllHabitLogInYear(habitId: number | undefined, year: number | undefined): Observable<GetAllHabitLogOutputDto[]> {
+        let url_ = this.baseUrl + "/api/services/app/Habit/GetAllHabitLogInYear?";
+        if (habitId === null)
+            throw new Error("The parameter 'habitId' cannot be null.");
+        else if (habitId !== undefined)
+            url_ += "habitId=" + encodeURIComponent("" + habitId) + "&";
+        if (year === null)
+            throw new Error("The parameter 'year' cannot be null.");
+        else if (year !== undefined)
+            url_ += "year=" + encodeURIComponent("" + year) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAllHabitLogInYear(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAllHabitLogInYear(<any>response_);
+                } catch (e) {
+                    return <Observable<GetAllHabitLogOutputDto[]>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<GetAllHabitLogOutputDto[]>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGetAllHabitLogInYear(response: HttpResponseBase): Observable<GetAllHabitLogOutputDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(GetAllHabitLogOutputDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<GetAllHabitLogOutputDto[]>(<any>null);
     }
 
     /**
@@ -2539,6 +2606,53 @@ export interface IAuthenticateResultModel {
     userId: number;
 }
 
+export class BaseReponseDto implements IBaseReponseDto {
+    statusCode: number;
+    message: string | undefined;
+
+    constructor(data?: IBaseReponseDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.statusCode = _data["statusCode"];
+            this.message = _data["message"];
+        }
+    }
+
+    static fromJS(data: any): BaseReponseDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BaseReponseDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["statusCode"] = this.statusCode;
+        data["message"] = this.message;
+        return data;
+    }
+
+    clone(): BaseReponseDto {
+        const json = this.toJSON();
+        let result = new BaseReponseDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IBaseReponseDto {
+    statusCode: number;
+    message: string | undefined;
+}
+
 export class ChangePasswordDto implements IChangePasswordDto {
     currentPassword: string;
     newPassword: string;
@@ -3077,6 +3191,61 @@ export interface IFlatPermissionDto {
     description: string | undefined;
 }
 
+export class GetAllHabitLogOutputDto implements IGetAllHabitLogOutputDto {
+    month: number;
+    habitLogDtos: HabitLogDto[] | undefined;
+
+    constructor(data?: IGetAllHabitLogOutputDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.month = _data["month"];
+            if (Array.isArray(_data["habitLogDtos"])) {
+                this.habitLogDtos = [] as any;
+                for (let item of _data["habitLogDtos"])
+                    this.habitLogDtos.push(HabitLogDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): GetAllHabitLogOutputDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new GetAllHabitLogOutputDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["month"] = this.month;
+        if (Array.isArray(this.habitLogDtos)) {
+            data["habitLogDtos"] = [];
+            for (let item of this.habitLogDtos)
+                data["habitLogDtos"].push(item.toJSON());
+        }
+        return data;
+    }
+
+    clone(): GetAllHabitLogOutputDto {
+        const json = this.toJSON();
+        let result = new GetAllHabitLogOutputDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IGetAllHabitLogOutputDto {
+    month: number;
+    habitLogDtos: HabitLogDto[] | undefined;
+}
+
 export class GetCurrentLoginInformationsOutput implements IGetCurrentLoginInformationsOutput {
     application: ApplicationInfoDto;
     user: UserLoginInfoDto;
@@ -3203,6 +3372,7 @@ export class Habit implements IHabit {
     order: number;
     goalPerDay: number;
     habitLogType: HabitLogType;
+    description: string | undefined;
     habitLogs: HabitLog[] | undefined;
 
     constructor(data?: IHabit) {
@@ -3223,6 +3393,7 @@ export class Habit implements IHabit {
             this.order = _data["order"];
             this.goalPerDay = _data["goalPerDay"];
             this.habitLogType = _data["habitLogType"];
+            this.description = _data["description"];
             if (Array.isArray(_data["habitLogs"])) {
                 this.habitLogs = [] as any;
                 for (let item of _data["habitLogs"])
@@ -3247,6 +3418,7 @@ export class Habit implements IHabit {
         data["order"] = this.order;
         data["goalPerDay"] = this.goalPerDay;
         data["habitLogType"] = this.habitLogType;
+        data["description"] = this.description;
         if (Array.isArray(this.habitLogs)) {
             data["habitLogs"] = [];
             for (let item of this.habitLogs)
@@ -3271,6 +3443,7 @@ export interface IHabit {
     order: number;
     goalPerDay: number;
     habitLogType: HabitLogType;
+    description: string | undefined;
     habitLogs: HabitLog[] | undefined;
 }
 
@@ -3282,6 +3455,7 @@ export class HabitDto implements IHabitDto {
     order: number;
     goalPerDay: number;
     habitLogType: HabitLogType;
+    description: string | undefined;
 
     constructor(data?: IHabitDto) {
         if (data) {
@@ -3301,6 +3475,7 @@ export class HabitDto implements IHabitDto {
             this.order = _data["order"];
             this.goalPerDay = _data["goalPerDay"];
             this.habitLogType = _data["habitLogType"];
+            this.description = _data["description"];
         }
     }
 
@@ -3320,6 +3495,7 @@ export class HabitDto implements IHabitDto {
         data["order"] = this.order;
         data["goalPerDay"] = this.goalPerDay;
         data["habitLogType"] = this.habitLogType;
+        data["description"] = this.description;
         return data;
     }
 
@@ -3339,6 +3515,7 @@ export interface IHabitDto {
     order: number;
     goalPerDay: number;
     habitLogType: HabitLogType;
+    description: string | undefined;
 }
 
 export class HabitDtoPagedResultDto implements IHabitDtoPagedResultDto {
@@ -3457,6 +3634,61 @@ export interface IHabitLog {
     status: HabitLogStatus;
     dateLog: moment.Moment;
     habit: Habit;
+}
+
+export class HabitLogDto implements IHabitLogDto {
+    id: number;
+    timeLog: number;
+    dateLog: moment.Moment;
+    status: number;
+
+    constructor(data?: IHabitLogDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.timeLog = _data["timeLog"];
+            this.dateLog = _data["dateLog"] ? moment(_data["dateLog"].toString()) : <any>undefined;
+            this.status = _data["status"];
+        }
+    }
+
+    static fromJS(data: any): HabitLogDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new HabitLogDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["timeLog"] = this.timeLog;
+        data["dateLog"] = this.dateLog ? this.dateLog.toISOString() : <any>undefined;
+        data["status"] = this.status;
+        return data;
+    }
+
+    clone(): HabitLogDto {
+        const json = this.toJSON();
+        let result = new HabitLogDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IHabitLogDto {
+    id: number;
+    timeLog: number;
+    dateLog: moment.Moment;
+    status: number;
 }
 
 export enum HabitLogStatus {

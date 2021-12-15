@@ -1,4 +1,4 @@
-import { HabitServiceProxy } from './../../../shared/service-proxies/service-proxies';
+import { HabitServiceProxy, HabitLog, HabitLogType } from './../../../shared/service-proxies/service-proxies';
 
 import {
   Component,
@@ -23,6 +23,7 @@ export class CreateOrEditHabitDialogComponent implements OnInit {
   habitId : number;
   habitDto: HabitDto = new HabitDto();
   saving = false;
+ 
   @Output() onSave = new EventEmitter<any>();
 
   constructor(public bsModalRef: BsModalRef,
@@ -30,6 +31,7 @@ export class CreateOrEditHabitDialogComponent implements OnInit {
     public notify: NotifyService) { }
 
   ngOnInit(): void {
+    this.habitDto.habitLogType = 0;
     if(this.habitId != null){
       this._habitService.get(this.habitId).subscribe((res)=>{
         this.habitDto = res;

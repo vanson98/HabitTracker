@@ -14,7 +14,7 @@ namespace HabitTracker.Habits
     public class HabitLog : Entity<long>
     {
         public int HabitId { get; set; }
-        // Thời gian thực hiện (phút)
+        // Thời gian đã thực hiện (phút)
         public float TimeLog { get; set; }
         public HabitLogStatus Status { get; set; }
         public DateTime DateLog { get; set; }

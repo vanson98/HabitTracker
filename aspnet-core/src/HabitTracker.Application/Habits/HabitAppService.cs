@@ -1,15 +1,12 @@
 ﻿using Abp.Application.Services;
-using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
-using Abp.UI;
+using HabitTracker.Common.Dto;
 using HabitTracker.Habits.Dtos;
 using HabitTracker.Habits.Enum;
 using HabitTracker.Habits.Interface;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace HabitTracker.Habits
@@ -46,7 +43,7 @@ namespace HabitTracker.Habits
             return await _repository
                 .GetAll()
                 .Where(h => keyword == null || h.Name.Contains(keyword))
-                .OrderBy(h=>h.Order)
+                .OrderBy(h => h.Order)
                 .Select(h => new HabitDto()
                 {
                     Id = h.Id,
@@ -55,7 +52,7 @@ namespace HabitTracker.Habits
                     TimeGoal = h.TimeGoal,
                     HabitLogType = h.HabitLogType,
                     Order = h.Order,
-                    PracticeTime = h.PracticeTime 
+                    PracticeTime = h.PracticeTime
                 }).ToListAsync();
         }
 
@@ -64,43 +61,85 @@ namespace HabitTracker.Habits
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<bool> LogWork(LogWorkInputDto input)
+        public async Task<BaseReponseDto> LogWork(LogWorkInputDto input)
         {
             var habit = await _repository.FirstOrDefaultAsync(input.HabitId);
-           
+
             // Check exist log
-            var logInDay = _habitLogRepository.GetAll().Where(hl => hl.DateLog.ToShortDateString() == input.DateLog.ToShortDateString()).FirstOrDefaultAsync();
-            if(logInDay!= null)
+            var logInDay = await _habitLogRepository.GetAll()
+                .Where(hl => hl.DateLog.Date == input.DateLog.Date && hl.HabitId == habit.Id)
+                .FirstOrDefaultAsync();
+            
+            if (logInDay != null)
             {
-                throw new UserFriendlyException("Thói quen này đã được log vào ngày này, không thể log thêm");
-            }
-
-            var habitLog = new HabitLog()
-            {
-                HabitId = input.HabitId,
-                TimeLog = input.TimeLog,
-                DateLog = input.DateLog
-            };
-
-            // Check type log
-            if (habit.HabitLogType == HabitLogType.ByGoalTime)
-            {
-                if(input.TimeLog >= habit.GoalPerDay)
+                // TH update
+                if(habit.HabitLogType == HabitLogType.ByGoalTime)
                 {
-                    habitLog.Status = HabitLogStatus.Done;
+
+                    logInDay.TimeLog += input.TimeLog;
                 }
                 else
                 {
-                    habitLog.Status = HabitLogStatus.NotDone;
+                    logInDay.Status = input.Status;
                 }
+                _habitLogRepository.Update(logInDay);
             }
             else
             {
-                habitLog.Status = input.Status;
+                var habitLog = new HabitLog()
+                {
+                    HabitId = input.HabitId,
+                    TimeLog = input.TimeLog,
+                    DateLog = input.DateLog
+                };
+                // Check type log
+                if (habit.HabitLogType == HabitLogType.ByGoalTime)
+                {
+                    if (input.TimeLog >= habit.GoalPerDay)
+                    {
+                        habitLog.Status = HabitLogStatus.Done;
+                    }
+                    else
+                    {
+                        habitLog.Status = HabitLogStatus.NotDone;
+                    }
+                    habit.PracticeTime += habitLog.TimeLog;
+                }
+                else
+                {
+                    habitLog.Status = input.Status;
+                }
+
+                _habitLogRepository.Insert(habitLog);
+               
             }
-            
-            _habitLogRepository.Insert(habitLog);
-            return true;
+            _repository.Update(habit);
+            return new BaseReponseDto()
+            {
+                StatusCode = 200,
+                Message = "Đã log thành công!"
+            };
+        }
+
+        public async Task<List<GetAllHabitLogOutputDto>> GetAllHabitLogInYear(int habitId, int year)
+        {
+            var listHabitLog = await (from hl in _habitLogRepository.GetAll()
+                                      where hl.HabitId == habitId && hl.DateLog.Year == year
+                                      select hl).ToListAsync();
+
+            return (from hl in listHabitLog
+                    group hl by hl.DateLog.Month into ghl
+                    select new GetAllHabitLogOutputDto()
+                    {
+                        Month = ghl.Key,
+                        HabitLogDtos = ghl.Select(hl => new HabitLogDto()
+                        {
+                            Id = hl.Id,
+                            DateLog = hl.DateLog,
+                            Status = (int)hl.Status,
+                            TimeLog = hl.TimeLog
+                        }).ToList()
+                    }).ToList();
         }
     }
 }

@@ -19,6 +19,7 @@ namespace HabitTracker.Habits.Dtos
         public float PracticeTime { get; set; } = 0;
         public int Order { get; set; }
         public float GoalPerDay { get; set; }
-        public HabitLogType HabitLogType { get; set; }
+        public HabitLogType HabitLogType { get; set; } = 0;
+        public string Description { get; set; }
     }
 }

@@ -41,7 +41,8 @@ import { SidebarMenuComponent } from './layout/sidebar-menu.component';
 import { HabitManagerComponent } from './habit-manager/habit-manager.component';
 import { HabitComponent } from './habit-manager/habit/habit.component';
 import { LogWorkDialogComponent } from './habit-manager/log-work-dialog/log-work-dialog.component';
-
+import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
+import { NgApexchartsModule } from 'ng-apexcharts';
 @NgModule({
   declarations: [
     AppComponent,
@@ -70,11 +71,12 @@ import { LogWorkDialogComponent } from './habit-manager/log-work-dialog/log-work
     SidebarLogoComponent,
     SidebarUserPanelComponent,
     SidebarMenuComponent,
-    //
+    // Habit
     HabitManagerComponent,
     HabitComponent,
     CreateOrEditHabitDialogComponent,
-    LogWorkDialogComponent
+    LogWorkDialogComponent,
+    // Apex chart
   ],
   imports: [
     CommonModule,
@@ -90,6 +92,8 @@ import { LogWorkDialogComponent } from './habit-manager/log-work-dialog/log-work
     ServiceProxyModule,
     SharedModule,
     NgxPaginationModule,
+    BsDatepickerModule.forRoot(),
+    NgApexchartsModule
   ],
   providers: [],
   entryComponents: [

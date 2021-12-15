@@ -39,7 +39,7 @@ export function getCurrentLanguage(): string {
     CollapseModule.forRoot(),
     TabsModule.forRoot(),
     ServiceProxyModule,
-    RootRoutingModule,
+    RootRoutingModule
   ],
   declarations: [RootComponent],
   providers: [

@@ -1,4 +1,5 @@
-﻿using HabitTracker.Habits.Dtos;
+﻿using HabitTracker.Common.Dto;
+using HabitTracker.Habits.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace HabitTracker.Habits.Interface
     {
         Task<Habit> UpdateHabit(HabitDto input);
         Task<ICollection<HabitDto>> GetAllNoPaging(string keyword);
-        Task<bool> LogWork(LogWorkInputDto input);
+        Task<BaseReponseDto> LogWork(LogWorkInputDto input);
+        Task<List<GetAllHabitLogOutputDto>> GetAllHabitLogInYear(int habitId, int year);
     }
 }
