@@ -3,6 +3,7 @@ import {
   HabitDto,
   HabitLogType,
   GetAllHabitLogOutputDto,
+  HabitLogDto,
 } from "./../../../shared/service-proxies/service-proxies";
 import {
   Component,
@@ -42,12 +43,11 @@ export type MultipleYAxisChartOptions = {
   series: ApexAxisChartSeries;
   chart: ApexChart;
   xaxis: ApexXAxis;
-  markers: any; //ApexMarkers;
-  stroke: any; //ApexStroke;
-  yaxis: ApexYAxis[];
-  dataLabels: ApexDataLabels;
+  yaxis: ApexYAxis | ApexYAxis[];
   title: ApexTitleSubtitle;
-  legend: ApexLegend;
+  labels: string[];
+  stroke: any; // ApexStroke;
+  dataLabels: any; // ApexDataLabels;
   fill: ApexFill;
   tooltip: ApexTooltip;
 }
@@ -70,6 +70,7 @@ export class HabitComponent implements OnInit {
   rangeYears : number[] = [];
   chartYear: number = moment().year();
   heatMapChartData: GetAllHabitLogOutputDto[];
+  timeDuration: number =7; // month
 
   constructor(
     private _habitService: HabitServiceProxy,
@@ -95,6 +96,7 @@ export class HabitComponent implements OnInit {
     this.isShowDetail = !this.isShowDetail
     if(this.isShowDetail){
       this.getAllHabitLogDataByYear();
+      this.getAllHabitLogInDuration();
     }
   }
 
@@ -148,6 +150,20 @@ export class HabitComponent implements OnInit {
     this._habitService.getAllHabitLogInYear(this.habitDto.id,this.chartYear).subscribe((res)=>{
       this.heatMapChartData = res;
       this.setUpHeatMapChartOption();
+    });
+  }
+
+  getAllHabitLogInDuration(){
+    this._habitService.getHabitLogByTime(this.habitDto.id,this.timeDuration).subscribe((res)=>{
+      this.multipleYAxisChartOption.series[0].data = res.map(hl=>{
+        return hl.timeLog;
+      });
+      this.multipleYAxisChartOption.series[1].data = res.map(hl=>{
+        return parseFloat((hl.accumulationTime/60).toFixed(2));
+      });
+      this.multipleYAxisChartOption.labels =  res.map(hl=>{
+        return hl.dateAgo;
+      });;
     });
   }
 
@@ -240,97 +256,52 @@ export class HabitComponent implements OnInit {
 
   // Setup bar chart option
   setMultipleYAxisChartOptions(){
-    this.multipleYAxisChartOption = {
+    this.multipleYAxisChartOption ={
       series: [
         {
-          name: "Income",
+          name: "Working time (minute)",
           type: "column",
-          data: [1.4, 2, 2.5, 1.5, 2.5, 2.8, 3.8, 4.6]
+          data: []
         },
         {
-          name: "Revenue",
+          name: "Accumulative Time (hour)",
           type: "line",
-          data: [20, 29, 37, 36, 44, 45, 50, 58]
+          data: []
         }
       ],
       chart: {
         height: 350,
-        type: "line",
-        stacked: false
-      },
-      dataLabels: {
-        enabled: false
+        type: "line"
       },
       stroke: {
-        width: [1, 1, 4]
+        width: [0, 1]
       },
       title: {
-        text: "XYZ - Stock Analysis (2009 - 2016)",
-        align: "left",
-        offsetX: 110
+        text: "Working time"
       },
+      dataLabels: {
+        enabled: false,
+        enabledOnSeries: [1]
+      },
+      labels: [
+       
+      ],
       xaxis: {
-        categories: [2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016]
+        type: "datetime"
       },
       yaxis: [
         {
-          axisTicks: {
-            show: true
-          },
-          axisBorder: {
-            show: true,
-            color: "#008FFB"
-          },
-          labels: {
-            style: {
-              colors: "#008FFB"
-            }
-          },
           title: {
-            text: "Income (thousand crores)",
-            style: {
-              color: "#008FFB"
-            }
-          },
-          tooltip: {
-            enabled: true
+            text: "Working time"
           }
         },
         {
-          seriesName: "Revenue",
           opposite: true,
-          axisTicks: {
-            show: true
-          },
-          axisBorder: {
-            show: true,
-            color: "#FEB019"
-          },
-          labels: {
-            style: {
-              colors: "#FEB019"
-            }
-          },
           title: {
-            text: "Revenue (thousand crores)",
-            style: {
-              color: "#FEB019"
-            }
+            text: "Accumulative Time"
           }
         }
-      ],
-      tooltip: {
-        fixed: {
-          enabled: true,
-          position: "topLeft", // topRight, topLeft, bottomRight, bottomLeft
-          offsetY: 30,
-          offsetX: 60
-        }
-      },
-      legend: {
-        horizontalAlign: "left",
-        offsetX: 40
-      }
+      ]
     };
   }
 

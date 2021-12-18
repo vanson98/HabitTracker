@@ -1,7 +1,7 @@
 <form
   class="form-horizontal"
   autocomplete="off"
-  #createHabitForm="ngForm"
+  #createOrUpdateHabitForm="ngForm"
   (ngSubmit)="save()"
 >
   <abp-modal-header
@@ -95,4 +95,9 @@
       </div>
     </div>
   </div>
+  <abp-modal-footer
+  [cancelDisabled]="saving"
+  [saveDisabled]="!createOrUpdateHabitForm.form.valid || saving"
+  (onCancelClick)="bsModalRef.hide()"
+></abp-modal-footer>
 </form>

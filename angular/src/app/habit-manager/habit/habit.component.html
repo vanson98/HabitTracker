@@ -79,27 +79,27 @@
       <select
         class="form-select form-control mt-3"
         style="width: 100px"
-        [(ngModel)]="chartYear"
-        name="chartYear"
-        (change)="getAllHabitLogDataByYear()"
+        [(ngModel)]="timeDuration"
+        name="timeDuration"
+        (change)="getAllHabitLogInDuration()"
       >
-        <option *ngFor="let year of rangeYears" [value]="year">
-          {{ year }}
-        </option>
+       <option value="7">1 Week</option>
+       <option value="30">1 Month</option>
+       <option value="90">3 Months</option>
+       <option value="365">12 Months</option>
       </select>
       <apx-chart
-        [series]="multipleYAxisChartOption.series"
-        [chart]="multipleYAxisChartOption.chart"
-        [xaxis]="multipleYAxisChartOption.xaxis"
-        [markers]="multipleYAxisChartOption.markers"
-        [stroke]="multipleYAxisChartOption.stroke"
-        [yaxis]="multipleYAxisChartOption.yaxis"
-        [dataLabels]="multipleYAxisChartOption.dataLabels"
-        [title]="multipleYAxisChartOption.title"
-        [fill]="multipleYAxisChartOption.fill"
-        [tooltip]="multipleYAxisChartOption.tooltip"
-        [legend]="multipleYAxisChartOption.legend"
-      ></apx-chart>
+      [series]="multipleYAxisChartOption.series"
+      [chart]="multipleYAxisChartOption.chart"
+      [yaxis]="multipleYAxisChartOption.yaxis"
+      [xaxis]="multipleYAxisChartOption.xaxis"
+      [labels]="multipleYAxisChartOption.labels"
+      [stroke]="multipleYAxisChartOption.stroke"
+      [title]="multipleYAxisChartOption.title"
+      [dataLabels]="multipleYAxisChartOption.dataLabels"
+      [fill]="multipleYAxisChartOption.fill"
+      [tooltip]="multipleYAxisChartOption.tooltip"
+    ></apx-chart>
     </div>
   </div>
 </div>

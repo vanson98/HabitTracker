@@ -518,6 +518,74 @@ export class HabitServiceProxy {
     }
 
     /**
+     * @param habitId (optional) 
+     * @param dayAmount (optional) 
+     * @return Success
+     */
+    getHabitLogByTime(habitId: number | undefined, dayAmount: number | undefined): Observable<HabitLogColumnChartDto[]> {
+        let url_ = this.baseUrl + "/api/services/app/Habit/GetHabitLogByTime?";
+        if (habitId === null)
+            throw new Error("The parameter 'habitId' cannot be null.");
+        else if (habitId !== undefined)
+            url_ += "habitId=" + encodeURIComponent("" + habitId) + "&";
+        if (dayAmount === null)
+            throw new Error("The parameter 'dayAmount' cannot be null.");
+        else if (dayAmount !== undefined)
+            url_ += "dayAmount=" + encodeURIComponent("" + dayAmount) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetHabitLogByTime(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetHabitLogByTime(<any>response_);
+                } catch (e) {
+                    return <Observable<HabitLogColumnChartDto[]>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<HabitLogColumnChartDto[]>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGetHabitLogByTime(response: HttpResponseBase): Observable<HabitLogColumnChartDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(HabitLogColumnChartDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<HabitLogColumnChartDto[]>(<any>null);
+    }
+
+    /**
      * @param id (optional) 
      * @return Success
      */
@@ -3634,6 +3702,57 @@ export interface IHabitLog {
     status: HabitLogStatus;
     dateLog: moment.Moment;
     habit: Habit;
+}
+
+export class HabitLogColumnChartDto implements IHabitLogColumnChartDto {
+    dateAgo: string | undefined;
+    timeLog: number;
+    accumulationTime: number;
+
+    constructor(data?: IHabitLogColumnChartDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.dateAgo = _data["dateAgo"];
+            this.timeLog = _data["timeLog"];
+            this.accumulationTime = _data["accumulationTime"];
+        }
+    }
+
+    static fromJS(data: any): HabitLogColumnChartDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new HabitLogColumnChartDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["dateAgo"] = this.dateAgo;
+        data["timeLog"] = this.timeLog;
+        data["accumulationTime"] = this.accumulationTime;
+        return data;
+    }
+
+    clone(): HabitLogColumnChartDto {
+        const json = this.toJSON();
+        let result = new HabitLogColumnChartDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IHabitLogColumnChartDto {
+    dateAgo: string | undefined;
+    timeLog: number;
+    accumulationTime: number;
 }
 
 export class HabitLogDto implements IHabitLogDto {

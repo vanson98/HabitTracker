@@ -11,7 +11,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist",
+            "outputPath": "D:\\WebDeploy\\habit-tracker-client",
             "index": "src/index.html",
             "main": "src/main.ts",
             "tsConfig": "src/tsconfig.json",
@@ -19,6 +19,7 @@
             "assets": [
               "src/assets",
               "src/favicon.ico",
+              "src/web.config",
               {
                 "glob": "abp.signalr.js",
                 "input": "node_modules/abp-web-resources/Abp/Framework/scripts/libs",

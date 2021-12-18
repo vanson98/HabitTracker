@@ -5,6 +5,7 @@ using HabitTracker.Habits.Dtos;
 using HabitTracker.Habits.Enum;
 using HabitTracker.Habits.Interface;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -69,13 +70,12 @@ namespace HabitTracker.Habits
             var logInDay = await _habitLogRepository.GetAll()
                 .Where(hl => hl.DateLog.Date == input.DateLog.Date && hl.HabitId == habit.Id)
                 .FirstOrDefaultAsync();
-            
+
             if (logInDay != null)
             {
                 // TH update
-                if(habit.HabitLogType == HabitLogType.ByGoalTime)
+                if (habit.HabitLogType == HabitLogType.ByGoalTime)
                 {
-
                     logInDay.TimeLog += input.TimeLog;
                 }
                 else
@@ -111,7 +111,6 @@ namespace HabitTracker.Habits
                 }
 
                 _habitLogRepository.Insert(habitLog);
-               
             }
             _repository.Update(habit);
             return new BaseReponseDto()
@@ -140,6 +139,47 @@ namespace HabitTracker.Habits
                             TimeLog = hl.TimeLog
                         }).ToList()
                     }).ToList();
+        }
+
+        public async Task<List<HabitLogColumnChartDto>> GetHabitLogByTime(int habitId, int dayAmount)
+        {
+            var fromDate = DateTime.Now.AddDays(-dayAmount);
+            var listHabitLog = await (from hl in _habitLogRepository.GetAll()
+                          where hl.DateLog >= fromDate && hl.HabitId ==habitId
+                          select hl
+                          ).ToListAsync();
+            var result = new List<HabitLogColumnChartDto>();
+            var accumulationTime = 0f;
+            for (var i = dayAmount;i>0;i--)
+            {
+                var dateLog = DateTime.Now.AddDays(-i);
+                var habitLog = listHabitLog.FirstOrDefault(hl => hl.DateLog.Date == dateLog.Date);
+                if (habitLog != null)
+                {
+                    if (i == 1)
+                    {
+                        accumulationTime += habitLog.TimeLog;
+                    }
+                    result.Add(new HabitLogColumnChartDto()
+                    {
+                        DateAgo = dateLog.ToString("MM/dd/yyyy"),
+                        TimeLog = habitLog.TimeLog,
+                        AccumulationTime = accumulationTime
+                    });
+                    accumulationTime += habitLog.TimeLog;
+                }
+                else
+                {
+                    result.Add(new HabitLogColumnChartDto()
+                    {
+                        DateAgo = dateLog.ToString("MM/dd/yyyy"),
+                        TimeLog = 0,
+                        AccumulationTime = accumulationTime
+                    });
+                }
+                
+            }
+            return result;
         }
     }
 }
