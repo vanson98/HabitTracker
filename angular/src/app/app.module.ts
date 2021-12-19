@@ -43,8 +43,11 @@ import { HabitComponent } from './habit-manager/habit/habit.component';
 import { LogWorkDialogComponent } from './habit-manager/log-work-dialog/log-work-dialog.component';
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { NgApexchartsModule } from 'ng-apexcharts';
+import { HabitCategoriesComponent } from './habit-categories/habit-categories.component';
+import { CreateOrEditHabitCategoryComponent } from './habit-categories/create-or-edit-habit-category/create-or-edit-habit-category.component';
+
 @NgModule({
-  declarations: [
+  declarations: [	
     AppComponent,
     HomeComponent,
     // tenants
@@ -76,8 +79,10 @@ import { NgApexchartsModule } from 'ng-apexcharts';
     HabitComponent,
     CreateOrEditHabitDialogComponent,
     LogWorkDialogComponent,
-    // Apex chart
-  ],
+    // Habit Category
+    HabitCategoriesComponent,
+    CreateOrEditHabitCategoryComponent
+   ],
   imports: [
     CommonModule,
     FormsModule,
@@ -109,7 +114,8 @@ import { NgApexchartsModule } from 'ng-apexcharts';
     ResetPasswordDialogComponent,
     // habits
     CreateOrEditHabitDialogComponent,
-    LogWorkDialogComponent
+    LogWorkDialogComponent,
+    CreateOrEditHabitCategoryComponent
   ],
   schemas:[
     CUSTOM_ELEMENTS_SCHEMA

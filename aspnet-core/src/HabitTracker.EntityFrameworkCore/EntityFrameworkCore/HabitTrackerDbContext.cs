@@ -13,6 +13,7 @@ namespace HabitTracker.EntityFrameworkCore
         public DbSet<Habit> Habits  { get; set; }
         public DbSet<HabitLog> HabitLogs { get; set; }
         public DbSet<DailyLog> DailyLogs { get; set; }
+        public DbSet<HabitCategory> HabitCategories { get; set; }
         public HabitTrackerDbContext(DbContextOptions<HabitTrackerDbContext> options)
             : base(options)
         {

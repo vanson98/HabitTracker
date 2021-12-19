@@ -1,0 +1,63 @@
+<form
+  class="form-horizontal"
+  autocomplete="off"
+  #createHabitCategoryForm="ngForm"
+  (ngSubmit)="save()"
+>
+  <abp-modal-header
+    [title]="this.id == null ? 'Create' : 'Update'"
+    (onCloseClick)="bsModalRef.hide()"
+  ></abp-modal-header>
+  <div class="modal-body">
+    
+    <div class="form-group row required">
+      <label class="col-md-3 col-form-label" for="name">
+        {{ "Name" | localize }}
+      </label>
+      <div class="col-md-9">
+        <input
+          type="text"
+          class="form-control"
+          name="name"
+          id="name"
+          maxlength="256"
+          required
+          [(ngModel)]="habitcategory.name"
+          #nameModel="ngModel"
+          #nameEl
+        />
+        <abp-validation-summary
+          [control]="nameModel"
+          [controlEl]="nameEl"
+        ></abp-validation-summary>
+      </div>
+    </div>
+   
+    <div class="form-group row">
+      <label class="col-md-3 col-form-label" for="description">
+        {{ "Description" | localize }}
+      </label>
+      <div class="col-md-9">
+        <input
+          type="email"
+          class="form-control"
+          name="description"
+          id="description"
+          maxlength="255"
+          [(ngModel)]="habitcategory.description"
+          #descriptionModel="ngModel"
+          #descriptionEl
+        />
+        <abp-validation-summary
+          [control]="descriptionModel"
+          [controlEl]="descriptionEl"
+        ></abp-validation-summary>
+      </div>
+    </div>
+  </div>
+  <abp-modal-footer
+    [cancelDisabled]="saving"
+    [saveDisabled]="!createHabitCategoryForm.form.valid || saving"
+    (onCancelClick)="bsModalRef.hide()"
+  ></abp-modal-footer>
+</form>

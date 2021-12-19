@@ -45,6 +45,7 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
         return [
             new MenuItem(this.l('HomePage'), '/app/home', 'fas fa-home'),
             new MenuItem('Habit Traker','/app/habits','far fa-calendar-check'),
+            new MenuItem('Habit Category','/app/habitcategories','far fa-calendar-check'),
             new MenuItem(
                 this.l('Roles'),
                 '/app/roles',

@@ -1,3 +1,4 @@
+import { HabitCategoriesComponent } from './habit-categories/habit-categories.component';
 import { HabitManagerComponent } from './habit-manager/habit-manager.component';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
@@ -18,6 +19,7 @@ import { ChangePasswordComponent } from './users/change-password/change-password
                 children: [
                     { path: 'home', component: HomeComponent,  canActivate: [AppRouteGuard] },
                     { path: 'habits', component: HabitManagerComponent,  canActivate: [AppRouteGuard] },
+                    { path: 'habitcategories', component: HabitCategoriesComponent,  canActivate: [AppRouteGuard] },
                     { path: 'users', component: UsersComponent, data: { permission: 'Pages.Users' }, canActivate: [AppRouteGuard] },
                     { path: 'roles', component: RolesComponent, data: { permission: 'Pages.Roles' }, canActivate: [AppRouteGuard] },
                     { path: 'tenants', component: TenantsComponent, data: { permission: 'Pages.Tenants' }, canActivate: [AppRouteGuard] },

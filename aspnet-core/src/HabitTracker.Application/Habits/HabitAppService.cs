@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace HabitTracker.Habits
 {
-    public class HabitAppService : CrudAppService<Habit, HabitDto>, IHabitAppService
+    public class HabitAppService : AsyncCrudAppService<Habit, HabitDto>, IHabitAppService
     {
         private readonly IRepository<Habit, int> _repository;
         private readonly IRepository<HabitLog, long> _habitLogRepository;

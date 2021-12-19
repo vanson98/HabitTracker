@@ -3,6 +3,7 @@ using HabitTracker.Habits.Enum;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,8 @@ namespace HabitTracker.Habits
 {
     public class Habit : Entity<int>
     {
+
+        public int? CategoryId { get; set; }
         [StringLength(255)]
         public string Name { get; set; }
         // Mục tiêu (600000 phút = 10000 giờ)
@@ -23,5 +26,7 @@ namespace HabitTracker.Habits
         [StringLength(500)]
         public string Description { get; set; }
         public virtual ICollection<HabitLog> HabitLogs { get; set; }
+        [ForeignKey("CategoryId")]
+        public virtual HabitCategory HabitCategory { get; set; }
     }
 }
