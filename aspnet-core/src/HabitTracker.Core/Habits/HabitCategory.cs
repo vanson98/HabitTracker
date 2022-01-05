@@ -10,6 +10,7 @@ namespace HabitTracker.Habits
         public string Name { get; set; }
         [StringLength(255)]
         public string Description { get; set; }
+        public float GoalTime { get; set; }
         public virtual ICollection<Habit> Habits { get; set; }
     }
 }

@@ -1,5 +1,5 @@
 import { LogWorkDialogComponent } from './log-work-dialog/log-work-dialog.component';
-import { HabitLogType, HabitServiceProxy } from "./../../shared/service-proxies/service-proxies";
+import { HabitCategoryDto, HabitCategoryServiceProxy, HabitLogType, HabitServiceProxy } from "./../../shared/service-proxies/service-proxies";
 import { CreateOrEditHabitDialogComponent } from "./create-or-edit-habit-dialog/create-or-edit-habit-dialog.component";
 import { Component, OnInit } from "@angular/core";
 import { HabitDto } from "@shared/service-proxies/service-proxies";
@@ -13,23 +13,38 @@ import { appModuleAnimation } from "@shared/animations/routerTransition";
   animations: [appModuleAnimation()],
 })
 export class HabitManagerComponent implements OnInit {
-  searchKeyWord : string;
+  searchKeyWord : string ;
+  categorySelected: number = -1 ;
+
   habits : HabitDto[];
+  listHabitCategory: HabitCategoryDto[];
+
   constructor(
     private _modalService: BsModalService,
-    private _habitService: HabitServiceProxy
+    private _habitService: HabitServiceProxy,
+    private _habitCategoryService: HabitCategoryServiceProxy
   ) {}
 
   ngOnInit(): void {
     this.getAllHabits();
+     // Get all habit category
+     this._habitCategoryService.getAll("",0,500).subscribe((res)=>{
+      this.listHabitCategory = res.items;
+    });
   }
 
   getAllHabits() {
-    this._habitService.getAllNoPaging(this.searchKeyWord).subscribe((res)=>{
+    this._habitService.getAllNoPaging(this.searchKeyWord,this.categorySelected).subscribe((res)=>{
       this.habits = res;
-    })
+    });
+    
   }
 
+  resetSearching(){
+    this.searchKeyWord = "";
+    this.categorySelected = -1;
+    this.getAllHabits();
+  }
   createHabit(): void {
     this.showCreateOrEditDialog();
   }

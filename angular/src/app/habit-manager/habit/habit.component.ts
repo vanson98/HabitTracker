@@ -156,7 +156,7 @@ export class HabitComponent implements OnInit {
   getAllHabitLogInDuration(){
     this._habitService.getHabitLogByTime(this.habitDto.id,this.timeDuration).subscribe((res)=>{
       this.multipleYAxisChartOption.series[0].data = res.map(hl=>{
-        return hl.timeLog;
+        return parseFloat((hl.timeLog/60).toFixed(2));
       });
       this.multipleYAxisChartOption.series[1].data = res.map(hl=>{
         return parseFloat((hl.accumulationTime/60).toFixed(2));

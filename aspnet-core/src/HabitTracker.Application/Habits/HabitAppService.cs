@@ -31,6 +31,7 @@ namespace HabitTracker.Habits
             habit.TimeGoal = input.TimeGoal;
             habit.Order = input.Order;
             habit.HabitLogType = input.HabitLogType;
+            habit.CategoryId = input.CategoryId;
             return await _repository.UpdateAsync(habit);
         }
 
@@ -39,11 +40,12 @@ namespace HabitTracker.Habits
         /// </summary>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        public async Task<ICollection<HabitDto>> GetAllNoPaging(string keyword)
+        public async Task<ICollection<HabitDto>> GetAllNoPaging(string keyword,int? categoryId)
         {
             return await _repository
                 .GetAll()
                 .Where(h => keyword == null || h.Name.Contains(keyword))
+                .Where(h=> categoryId == -1 || h.CategoryId==categoryId)
                 .OrderBy(h => h.Order)
                 .Select(h => new HabitDto()
                 {
@@ -77,11 +79,17 @@ namespace HabitTracker.Habits
                 if (habit.HabitLogType == HabitLogType.ByGoalTime)
                 {
                     logInDay.TimeLog += input.TimeLog;
+                    if (logInDay.TimeLog >= habit.GoalPerDay)
+                    {
+                        logInDay.Status = HabitLogStatus.Done;
+                    }
+                    habit.PracticeTime += input.TimeLog;
                 }
                 else
                 {
                     logInDay.Status = input.Status;
                 }
+                
                 _habitLogRepository.Update(logInDay);
             }
             else
@@ -150,13 +158,13 @@ namespace HabitTracker.Habits
                           ).ToListAsync();
             var result = new List<HabitLogColumnChartDto>();
             var accumulationTime = 0f;
-            for (var i = dayAmount;i>0;i--)
+            for (var i = (dayAmount-1);i>=0;i--)
             {
                 var dateLog = DateTime.Now.AddDays(-i);
                 var habitLog = listHabitLog.FirstOrDefault(hl => hl.DateLog.Date == dateLog.Date);
                 if (habitLog != null)
                 {
-                    if (i == 1)
+                    if (i == 0)
                     {
                         accumulationTime += habitLog.TimeLog;
                     }

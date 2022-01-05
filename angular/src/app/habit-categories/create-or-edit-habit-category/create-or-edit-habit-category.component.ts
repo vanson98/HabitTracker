@@ -39,12 +39,17 @@ export class CreateOrEditHabitCategoryComponent
     if(this.id != null){
       this._habitcategoryService.get(this.id).subscribe((habitCategory)=>{
         this.habitcategory = habitCategory;
+        this.habitcategory.goalTime = this.habitcategory.goalTime/60;
       })
+    }else{
+      this.habitcategory.goalTime = 10000;
     }
   }
 
   save(): void {
     this.saving = true;
+    // Dữ liệu ở db là phút nên phải nhân với 60
+    this.habitcategory.goalTime = this.habitcategory.goalTime * 60;
     if (!this.id) {
       this._habitcategoryService.create(this.habitcategory).subscribe(
         () => {

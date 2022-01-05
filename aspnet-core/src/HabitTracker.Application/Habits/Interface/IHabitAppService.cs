@@ -11,7 +11,7 @@ namespace HabitTracker.Habits.Interface
     public interface IHabitAppService
     {
         Task<Habit> UpdateHabit(HabitDto input);
-        Task<ICollection<HabitDto>> GetAllNoPaging(string keyword);
+        Task<ICollection<HabitDto>> GetAllNoPaging(string keyword,int? categoryId);
         Task<BaseReponseDto> LogWork(LogWorkInputDto input);
         Task<List<GetAllHabitLogOutputDto>> GetAllHabitLogInYear(int habitId, int year);
         Task<List<HabitLogColumnChartDto>> GetHabitLogByTime(int habitId, int monthAmount);

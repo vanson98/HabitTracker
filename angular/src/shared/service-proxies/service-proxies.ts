@@ -332,14 +332,19 @@ export class HabitServiceProxy {
 
     /**
      * @param keyword (optional) 
+     * @param categoryId (optional) 
      * @return Success
      */
-    getAllNoPaging(keyword: string | undefined): Observable<HabitDto[]> {
+    getAllNoPaging(keyword: string | undefined, categoryId: number | undefined): Observable<HabitDto[]> {
         let url_ = this.baseUrl + "/api/services/app/Habit/GetAllNoPaging?";
         if (keyword === null)
             throw new Error("The parameter 'keyword' cannot be null.");
         else if (keyword !== undefined)
             url_ += "keyword=" + encodeURIComponent("" + keyword) + "&";
+        if (categoryId === null)
+            throw new Error("The parameter 'categoryId' cannot be null.");
+        else if (categoryId !== undefined)
+            url_ += "categoryId=" + encodeURIComponent("" + categoryId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -3825,6 +3830,7 @@ export class HabitCategory implements IHabitCategory {
     id: number;
     name: string | undefined;
     description: string | undefined;
+    goalTime: number;
     habits: Habit[] | undefined;
 
     constructor(data?: IHabitCategory) {
@@ -3841,6 +3847,7 @@ export class HabitCategory implements IHabitCategory {
             this.id = _data["id"];
             this.name = _data["name"];
             this.description = _data["description"];
+            this.goalTime = _data["goalTime"];
             if (Array.isArray(_data["habits"])) {
                 this.habits = [] as any;
                 for (let item of _data["habits"])
@@ -3861,6 +3868,7 @@ export class HabitCategory implements IHabitCategory {
         data["id"] = this.id;
         data["name"] = this.name;
         data["description"] = this.description;
+        data["goalTime"] = this.goalTime;
         if (Array.isArray(this.habits)) {
             data["habits"] = [];
             for (let item of this.habits)
@@ -3881,12 +3889,14 @@ export interface IHabitCategory {
     id: number;
     name: string | undefined;
     description: string | undefined;
+    goalTime: number;
     habits: Habit[] | undefined;
 }
 
 export class HabitCategoryDto implements IHabitCategoryDto {
     id: number;
     name: string | undefined;
+    goalTime: number;
     description: string | undefined;
 
     constructor(data?: IHabitCategoryDto) {
@@ -3902,6 +3912,7 @@ export class HabitCategoryDto implements IHabitCategoryDto {
         if (_data) {
             this.id = _data["id"];
             this.name = _data["name"];
+            this.goalTime = _data["goalTime"];
             this.description = _data["description"];
         }
     }
@@ -3917,6 +3928,7 @@ export class HabitCategoryDto implements IHabitCategoryDto {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
         data["name"] = this.name;
+        data["goalTime"] = this.goalTime;
         data["description"] = this.description;
         return data;
     }
@@ -3932,6 +3944,7 @@ export class HabitCategoryDto implements IHabitCategoryDto {
 export interface IHabitCategoryDto {
     id: number;
     name: string | undefined;
+    goalTime: number;
     description: string | undefined;
 }
 
@@ -3999,6 +4012,7 @@ export class HabitDto implements IHabitDto {
     goalPerDay: number;
     habitLogType: HabitLogType;
     description: string | undefined;
+    categoryId: number | undefined;
 
     constructor(data?: IHabitDto) {
         if (data) {
@@ -4019,6 +4033,7 @@ export class HabitDto implements IHabitDto {
             this.goalPerDay = _data["goalPerDay"];
             this.habitLogType = _data["habitLogType"];
             this.description = _data["description"];
+            this.categoryId = _data["categoryId"];
         }
     }
 
@@ -4039,6 +4054,7 @@ export class HabitDto implements IHabitDto {
         data["goalPerDay"] = this.goalPerDay;
         data["habitLogType"] = this.habitLogType;
         data["description"] = this.description;
+        data["categoryId"] = this.categoryId;
         return data;
     }
 
@@ -4059,6 +4075,7 @@ export interface IHabitDto {
     goalPerDay: number;
     habitLogType: HabitLogType;
     description: string | undefined;
+    categoryId: number | undefined;
 }
 
 export class HabitDtoPagedResultDto implements IHabitDtoPagedResultDto {

@@ -1,4 +1,4 @@
-import { HabitServiceProxy, HabitLog, HabitLogType } from './../../../shared/service-proxies/service-proxies';
+import { HabitServiceProxy, HabitLog, HabitLogType, HabitCategoryDto, HabitCategoryServiceProxy } from './../../../shared/service-proxies/service-proxies';
 
 import {
   Component,
@@ -23,11 +23,13 @@ export class CreateOrEditHabitDialogComponent implements OnInit {
   habitId : number;
   habitDto: HabitDto = new HabitDto();
   saving = false;
+  listHabitCategory : HabitCategoryDto[] 
  
   @Output() onSave = new EventEmitter<any>();
 
   constructor(public bsModalRef: BsModalRef,
     public _habitService: HabitServiceProxy,
+    public _habitCategoryService: HabitCategoryServiceProxy,
     public notify: NotifyService) { }
 
   ngOnInit(): void {
@@ -35,12 +37,20 @@ export class CreateOrEditHabitDialogComponent implements OnInit {
     if(this.habitId != null){
       this._habitService.get(this.habitId).subscribe((res)=>{
         this.habitDto = res;
+        this.habitDto.timeGoal = this.habitDto.timeGoal / 60;
       })
-    }
+    }else{
+      this.habitDto.timeGoal = 10000;
+    };
+    // Get all habit category
+    this._habitCategoryService.getAll("",0,500).subscribe((res)=>{
+      this.listHabitCategory = res.items;
+    })
   }
 
   save(){
     this.saving = true;
+    this.habitDto.timeGoal = this.habitDto.timeGoal * 60;
     if(this.habitId){
       this._habitService.update(this.habitDto).subscribe(
         () => {

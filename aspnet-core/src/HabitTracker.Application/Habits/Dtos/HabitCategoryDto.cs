@@ -13,6 +13,7 @@ namespace HabitTracker.Habits.Dtos
     public class HabitCategoryDto : EntityDto<int>
     {
         public string Name { get; set; }
+        public float GoalTime { get; set; }
         public string Description { get; set; }
     }
 }

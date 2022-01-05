@@ -4,14 +4,16 @@ using HabitTracker.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HabitTracker.Migrations
 {
     [DbContext(typeof(HabitTrackerDbContext))]
-    partial class HabitTrackerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211225095252_HabitDbV5")]
+    partial class HabitDbV5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1638,104 +1640,6 @@ namespace HabitTracker.Migrations
                     b.ToTable("HabitLogs");
                 });
 
-            modelBuilder.Entity("HabitTracker.Investing.InvestingInfo", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("InvestmentChannel")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<float>("MarketValueOfStocks")
-                        .HasColumnType("real");
-
-                    b.Property<float>("MoneyInput")
-                        .HasColumnType("real");
-
-                    b.Property<float>("MoneyOutput")
-                        .HasColumnType("real");
-
-                    b.Property<float>("NAV")
-                        .HasColumnType("real");
-
-                    b.Property<float>("PurchasingPower")
-                        .HasColumnType("real");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("InvestingInfos");
-                });
-
-            modelBuilder.Entity("HabitTracker.Investing.Investment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("CompanyName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<float>("CurrentPrice")
-                        .HasColumnType("real");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StockCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<float>("TotalBuy")
-                        .HasColumnType("real");
-
-                    b.Property<float>("TotalSell")
-                        .HasColumnType("real");
-
-                    b.Property<int>("Vol")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Investments");
-                });
-
-            modelBuilder.Entity("HabitTracker.Investing.Transaction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime?>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("InvestmentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("NumberOfShares")
-                        .HasColumnType("int");
-
-                    b.Property<float>("Price")
-                        .HasColumnType("real");
-
-                    b.Property<DateTime>("TransactionTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("TransactionType")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InvestmentId");
-
-                    b.ToTable("Transactions");
-                });
-
             modelBuilder.Entity("HabitTracker.MultiTenancy.Tenant", b =>
                 {
                     b.Property<int>("Id")
@@ -2037,17 +1941,6 @@ namespace HabitTracker.Migrations
                     b.Navigation("Habit");
                 });
 
-            modelBuilder.Entity("HabitTracker.Investing.Transaction", b =>
-                {
-                    b.HasOne("HabitTracker.Investing.Investment", "Investment")
-                        .WithMany("Transactions")
-                        .HasForeignKey("InvestmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Investment");
-                });
-
             modelBuilder.Entity("HabitTracker.MultiTenancy.Tenant", b =>
                 {
                     b.HasOne("HabitTracker.Authorization.Users.User", "CreatorUser")
@@ -2154,11 +2047,6 @@ namespace HabitTracker.Migrations
             modelBuilder.Entity("HabitTracker.Habits.HabitCategory", b =>
                 {
                     b.Navigation("Habits");
-                });
-
-            modelBuilder.Entity("HabitTracker.Investing.Investment", b =>
-                {
-                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

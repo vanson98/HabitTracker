@@ -4,14 +4,16 @@ using HabitTracker.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HabitTracker.Migrations
 {
     [DbContext(typeof(HabitTrackerDbContext))]
-    partial class HabitTrackerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211226074623_DbV6")]
+    partial class DbV6
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1708,7 +1710,7 @@ namespace HabitTracker.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime?>("CreateDate")
+                    b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("InvestmentId")
@@ -1720,14 +1722,8 @@ namespace HabitTracker.Migrations
                     b.Property<float>("Price")
                         .HasColumnType("real");
 
-                    b.Property<DateTime>("TransactionTime")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("TransactionType")
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
