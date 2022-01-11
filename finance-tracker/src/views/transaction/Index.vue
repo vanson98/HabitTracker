@@ -1,39 +1,80 @@
 <template>
   <div>
-    <div class="my-2 flex flex-row">
-      <div>
-        <el-button @click="createTransaction">Add Transaction</el-button>
+    <!-- start control container -->
+    <div class="flex flex-row">
+      <div class="flex flex-col mx-2">
+        <label>Channel</label>
+        <el-select
+          placeholder="Chọn kênh đầu tư"
+          @change="getAllTransaction"
+          v-model="channelIdSelected"
+        >
+          <el-option
+            v-for="channel in listChannel"
+            :key="channel.id"
+            :label="channel.code + ' - ' + channel.name"
+            :value="channel.id"
+          ></el-option>
+        </el-select>
       </div>
-      <div>
+      <div class="flex-grow" style="padding-top: 24px">
+        <el-button type="primary">Nhập tiền</el-button>
+        <el-button type="primary">Rút tiền</el-button>
+        <el-button type="primary">Cập nhật phí</el-button>
+      </div>
+    </div>
+    <!-- end control container -->
+
+    <!-- start info container -->
+    <div>
+      <table class="w-full">
+        <tr>
+          <td>Tổng tiền nhập vào</td>
+          <td class="float-left">12</td>
+          <td>Tiền mặt thực có</td>
+          <td>10</td>
+          <td>Tổng tiền rút ra</td>
+          <td>13</td>
+        </tr>
+      </table>
+    </div>
+    <!-- end info container -->
+
+    <!-- start search form -->
+    <div class="my-2 flex flex-row">
+      <div class="flex flex-col mx-2 w-1/4">
         <label>Stock Code</label>
         <el-select
           v-model="searchingInfo.investmentId"
           placeholder="Nhập mã CP"
+          @change="getAllTransaction"
         >
           <el-option
             v-for="item in listInvestment"
             :key="item.id"
             :value="item.id"
-            :label="item.stockCode"
+            :label="item.stockCode + ' - ' + item.companyName"
           ></el-option>
         </el-select>
       </div>
-      <div>
-        <label>Loại giao dịch</label>
+      <div class="flex flex-col mx-2">
+        <label>Transaction Type</label>
         <el-select
           v-model="searchingInfo.transactionType"
           placeholder="Chọn loại giao dịch"
+          @change="getAllTransaction"
         >
+          <el-option :label="'ALL'" :value="-1"></el-option>
           <el-option
-            v-for="item in TransactionType"
-            :key="item"
-            :label="item"
-            :value="item"
+            v-for="keyEnum in transactionTypeEnumKey"
+            :key="keyEnum"
+            :label="keyEnum"
+            :value="transactionType[keyEnum]"
           ></el-option>
         </el-select>
       </div>
-      <div class="block">
-        <label class="demonstration">With quick options</label>
+      <div class="flex flex-col mx-2">
+        <label class="demonstration">Time Range</label>
         <el-date-picker
           v-model="timeRangeSelect"
           type="daterange"
@@ -42,11 +83,20 @@
           start-placeholder="Start date"
           end-placeholder="End date"
           :shortcuts="defaultTimeRange"
+          @change="getAllTransaction"
         >
         </el-date-picker>
       </div>
-      <div></div>
+      <div class="mt-auto flex-grow">
+        <el-button @click="resetSearching" type="primary">Reset</el-button>
+        <el-button @click="createTransaction" class="float-right" type="primary"
+          >Add Transaction</el-button
+        >
+      </div>
     </div>
+    <!-- end search form -->
+
+    <!-- start table content -->
     <div class="table-ctn">
       <el-table
         :data="listTransaction"
@@ -64,21 +114,45 @@
           label="Mã CK"
           width="150"
         ></el-table-column>
-        <el-table-column prop="transactionType" label="Type" width="150">
+        <el-table-column label="Type" width="150">
+          <template #default="scope">
+            <span
+              :class="{
+                't-buy': scope.row.transactionType == transactionType.BUY,
+                't-sell': scope.row.transactionType == transactionType.SELL,
+              }"
+              >{{ transactionType[scope.row.transactionType] }}</span
+            >
+          </template>
         </el-table-column>
-        <el-table-column prop="price" label="Giá"></el-table-column>
+        <el-table-column prop="price" label="Giá (x1000đ)"> </el-table-column>
         <el-table-column
           prop="numberOfShares"
           label="Số lượng"
         ></el-table-column>
-        <el-table-column
-          prop="transactionTime"
-          label="Thời gian giao dịch"
-        ></el-table-column>
-        <el-table-column
-          prop="createDate"
-          label="Thời gian tạo"
-        ></el-table-column>
+        <el-table-column label="Tổng tiền">
+          <template #default="scope">
+            <span>{{
+              util.formatCurrency(
+                scope.row.numberOfShares * scope.row.price * 1000,
+              )
+            }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Thời gian giao dịch">
+          <template #default="scope">
+            <span>{{
+              moment(scope.row.transactionTime).format("DD/MM/yyyy")
+            }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Thời gian tạo">
+          <template #default="scope">
+            <span>{{
+              moment(scope.row.creationTime).format("DD/MM/yyyy")
+            }}</span>
+          </template>
+        </el-table-column>
         <el-table-column label="Action" :align="'center'" width="180">
           <template #default="scope">
             <el-button size="small" @click="editTransaction(scope.row.id)"
@@ -87,7 +161,7 @@
             <el-button
               size="small"
               type="danger"
-              @click="deleteTransaction(scope.row)"
+              @click="deleteTransaction(scope.row.id)"
               >Delete</el-button
             >
           </template>
@@ -103,38 +177,38 @@
         ></el-pagination>
       </div>
     </div>
+    <!-- end table content -->
+
+    <!-- dialogs -->
     <COETransactionDialog
       :isOpen="isOpenDialog"
       :editTransactionId="editTransactionId"
       @close="closeDialog"
     ></COETransactionDialog>
+    <AddOrWithdrawMoneyDialog :isOpen="isOpenAddOrWithdrawMoney" />
   </div>
 </template>
 <script lang="ts" setup>
-import { onBeforeMount, onMounted, ref } from "vue";
+import { onBeforeMount, ref } from "vue";
 import COETransactionDialog from "./COETransactionDialog.vue";
-import { ElButton } from "element-plus";
+import { ElButton, ElMessage, ElMessageBox } from "element-plus";
 import TransactionDto, {
   SearchTransactionInputDto,
   TransactionType,
 } from "@/models/transaction/TransactionModels";
 import financeService from "@/services/finance.service";
 import transactionService from "@/services/transaction.service";
+import investmentChannelService from "@/services/investment-channel.service";
 import { SearchTransactionOutputDto } from "@/models/transaction/TransactionModels";
 import InvestmentSelectDto from "@/models/investment/InvestmentSelectDto";
+import util from "@/lib/util";
+import moment from "moment";
+import { ChannelSellectDto } from "@/models/investment-channel/InvestmentChannelModels";
+import AddOrWithdrawMoney from "./AddOrWithdrawMoneyDialog.vue";
+import AddOrWithdrawMoneyDialog from "./AddOrWithdrawMoneyDialog.vue";
 
+// page data
 const pageSize = 10;
-let currentPage = ref(1);
-let totalCount = ref(0);
-let isOpenDialog = ref(false);
-let editTransactionId = ref<number | null>(null);
-let listTransaction = ref<SearchTransactionOutputDto[]>();
-let listInvestment: InvestmentSelectDto[] = [];
-let searchingInfo = ref<SearchTransactionInputDto>({
-  maxResultCount: pageSize,
-  skipCount: 0,
-});
-let timeRangeSelect = ref("");
 const defaultTimeRange = [
   {
     text: "Last week",
@@ -164,12 +238,51 @@ const defaultTimeRange = [
     },
   },
 ];
+let listChannel = ref<ChannelSellectDto[]>();
+let channelIdSelected = ref();
+let currentPage = ref(1);
+let totalCount = ref(0);
+let listTransaction = ref<SearchTransactionOutputDto[]>();
+let listInvestment = ref<InvestmentSelectDto[]>();
+let searchingInfo = ref<SearchTransactionInputDto>({
+  maxResultCount: pageSize,
+  skipCount: 0,
+  transactionType: -1,
+});
+let timeRangeSelect = ref("");
+let transactionType = TransactionType;
+let transactionTypeEnumKey = util.getEnumKeys(transactionType);
+
+// dialog data
+let isOpenDialog = ref(false);
+let isOpenAddOrWithdrawMoney = ref(false);
+let editTransactionId = ref<number | null>(null);
+
+const init = () => {
+  investmentChannelService.getAllChannel().then((res) => {
+    listChannel.value = res.result;
+    if (listChannel.value.length > 0) {
+      channelIdSelected.value = listChannel.value[0].id;
+      getAllInvestment();
+      getAllTransaction();
+    }
+  });
+};
 
 // Event
 onBeforeMount(() => {
-  getAllInvestment();
-  getAllTransaction();
+  init();
 });
+
+const resetSearching = () => {
+  searchingInfo.value = {
+    maxResultCount: pageSize,
+    skipCount: 0,
+    transactionType: -1,
+  };
+  timeRangeSelect.value = "";
+  getAllTransaction();
+};
 
 // Page change
 const pageChange = (page: number) => {
@@ -179,6 +292,14 @@ const pageChange = (page: number) => {
 
 // Get All Transaction
 const getAllTransaction = () => {
+  if (timeRangeSelect.value != "" && timeRangeSelect.value.length == 2) {
+    searchingInfo.value.fromTransactionDate = moment(
+      timeRangeSelect.value[0],
+    ).toISOString();
+    searchingInfo.value.toTransactionDate = moment(
+      timeRangeSelect.value[1],
+    ).toISOString();
+  }
   searchingInfo.value.skipCount = (currentPage.value - 1) * pageSize;
   transactionService
     .searchPaging(searchingInfo.value)
@@ -194,22 +315,55 @@ const getAllTransaction = () => {
 // Get all investment
 const getAllInvestment = () => {
   financeService.getAllForSelect().then((res) => {
-    listInvestment = res.result;
+    listInvestment.value = res.result;
   });
 };
 
+// Tạo mới transaction
 const createTransaction = () => {
   isOpenDialog.value = true;
   editTransactionId.value = null;
 };
 
+// Sửa transaction
 const editTransaction = (id: number) => {
   isOpenDialog.value = true;
   editTransactionId.value = id;
 };
 
-const deleteTransaction = (row: any) => {
-  console.log("delete");
+// Xóa transaction
+const deleteTransaction = (id: number) => {
+  ElMessageBox.confirm(
+    "Thao tác này sẽ xóa vĩnh viễn giao dịch. Bạn có muốn tiếp tục?",
+    "Warning",
+    {
+      confirmButtonText: "OK",
+      cancelButtonText: "Cancel",
+      type: "warning",
+    },
+  )
+    .then(() => {
+      transactionService.delete(id).then((res) => {
+        if (res.success) {
+          getAllTransaction();
+          ElMessage({
+            type: "success",
+            message: "Delete completed",
+          });
+        } else {
+          ElMessage({
+            type: "info",
+            message: "Delete canceled",
+          });
+        }
+      });
+    })
+    .catch(() => {
+      ElMessage({
+        type: "info",
+        message: "Delete canceled",
+      });
+    });
 };
 
 const closeDialog = (isSuccess: boolean) => {
@@ -219,4 +373,18 @@ const closeDialog = (isSuccess: boolean) => {
   }
 };
 </script>
-<style></style>
+
+<style>
+.t-buy {
+  color: #42c442;
+  background-color: #88d48833;
+  padding: 8px;
+  font-weight: 600;
+}
+.t-sell {
+  color: red;
+  background-color: #e2a6a659;
+  padding: 8px;
+  font-weight: 600;
+}
+</style>

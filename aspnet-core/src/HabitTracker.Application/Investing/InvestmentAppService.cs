@@ -19,7 +19,7 @@ namespace HabitTracker.Investing
         }
         public List<InvestmentSelectDto> GetAllForSelect()
         {
-            return _repository.GetAll().Select((ivm) => new InvestmentSelectDto()
+            return _repository.GetAll().OrderByDescending(ivm=>ivm.Id).Select((ivm) => new InvestmentSelectDto()
             {
                 Id = ivm.Id,
                 CompanyName = ivm.CompanyName,

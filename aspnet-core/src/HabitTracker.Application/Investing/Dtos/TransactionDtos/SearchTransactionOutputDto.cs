@@ -10,5 +10,6 @@ namespace HabitTracker.Investing.Dtos.TransactionDtos
     public class SearchTransactionOutputDto : TransactionDto
     {
         public string StockCode { get; set; }
+        public float Sum { get; set; }
     }
 }

@@ -12,5 +12,6 @@ namespace HabitTracker.Investing.Interface
     public interface ITransactionService
     {
         Task<PagedResultDto<SearchTransactionOutputDto>> SearchPaging(SearchTransactionPagingInputDto input);
+        
     }
 }

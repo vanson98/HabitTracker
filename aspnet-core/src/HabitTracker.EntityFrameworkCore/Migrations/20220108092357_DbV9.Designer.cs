@@ -4,14 +4,16 @@ using HabitTracker.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HabitTracker.Migrations
 {
     [DbContext(typeof(HabitTrackerDbContext))]
-    partial class HabitTrackerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220108092357_DbV9")]
+    partial class DbV9
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1657,22 +1659,13 @@ namespace HabitTracker.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
                     b.Property<string>("StockCode")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("TotalAmountBuy")
+                    b.Property<float>("TotalBuy")
                         .HasColumnType("real");
 
-                    b.Property<float>("TotalAmountSell")
-                        .HasColumnType("real");
-
-                    b.Property<float>("TotalMoneyBuy")
-                        .HasColumnType("real");
-
-                    b.Property<float>("TotalMoneySell")
+                    b.Property<float>("TotalSell")
                         .HasColumnType("real");
 
                     b.Property<int>("Vol")

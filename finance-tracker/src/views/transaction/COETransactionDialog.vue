@@ -5,18 +5,18 @@
     width="30%"
     @close="closeModel(false)"
   >
-    <div>
+    <div class="flex flex-col">
       <div>
-        <label>Nhập mã cổ phiếu</label>
+        <label class="mb-3">Nhập mã cổ phiếu</label>
         <el-select
           v-model="transaction.investmentId"
-          class="m-2"
+          class="w-full my-2"
           placeholder="Chọn mã cổ phiếu"
         >
           <el-option
             v-for="item in listInvestment"
             :key="item.id"
-            :label="item.stockCode + '-' + item.companyName"
+            :label="item.stockCode + ' - ' + item.companyName"
             :value="item.id"
           ></el-option>
         </el-select>
@@ -26,31 +26,54 @@
         <el-select
           v-model="transaction.transactionType"
           placeholder="Chọn loại giao dịch"
+          class="w-full my-2"
         >
           <el-option
-            v-for="item in TransactionType"
-            :key="item"
-            :label="item"
-            :value="item"
+            v-for="keyEnum in transactionTypeEnumKey"
+            :key="keyEnum"
+            :label="keyEnum"
+            :value="transactionType[keyEnum]"
           ></el-option>
         </el-select>
       </div>
       <div>
-        <label>Giá</label>
-        <el-input v-model="transaction.price" type="number"></el-input>
+        <label>Giá (x1000)</label>
+        <el-input
+          v-model="transaction.price"
+          type="number"
+          class="w-full my-2"
+          placeholder="Nhập giá"
+        ></el-input>
       </div>
       <div>
         <label>Số lượng</label>
-        <el-input v-model="transaction.numberOfShares" type="number"></el-input>
+        <el-input
+          v-model="transaction.numberOfShares"
+          type="number"
+          class="w-full my-2"
+          placeholder="Nhập số lượng"
+        ></el-input>
       </div>
-      <div>
-        <label>Thời gian giao dịch</label>
-        <el-date-picker
-          v-model="transaction.transactionTime"
-          type="date"
-          placeholder="Pick a day"
-        >
-        </el-date-picker>
+      <div class="flex">
+        <div class="w-2/3">
+          <div>Thời gian giao dịch</div>
+          <el-date-picker
+            v-model="transaction.transactionTime"
+            type="date"
+            class="w-full my-2"
+            placeholder="Chọn ngày"
+          ></el-date-picker>
+        </div>
+        <div class="w-1/3">
+          <p>Thành tiền</p>
+          {{
+            transaction.numberOfShares && transaction.price
+              ? util.formatCurrency(
+                  transaction.numberOfShares * transaction.price * 1000,
+                )
+              : ""
+          }}
+        </div>
       </div>
     </div>
     <template #footer>
@@ -63,7 +86,8 @@
 </template>
 <script lang="ts" setup>
 import InvestmentSelectDto from "@/models/investment/InvestmentSelectDto";
-import Transaction, {
+import util from "@/lib/util";
+import TransactionDto, {
   TransactionType,
 } from "@/models/transaction/TransactionModels";
 import transactionService from "@/services/transaction.service";
@@ -74,18 +98,19 @@ import {
   defineEmits,
   withDefaults,
   onUpdated,
-  onMounted,
-  onActivated,
-  onDeactivated,
-  watch,
   onBeforeMount,
 } from "vue";
 import financeService from "@/services/finance.service";
 
 //data
-let transaction = ref<Transaction>({});
-let listInvestment: InvestmentSelectDto[] = [];
 
+let listInvestment = ref<InvestmentSelectDto[]>();
+let transactionType = TransactionType;
+let transactionTypeEnumKey = util.getEnumKeys(transactionType);
+let transaction = ref<TransactionDto>({
+  transactionTime: new Date(),
+  transactionType: transactionType.BUY,
+});
 // Prop
 const props = withDefaults(
   defineProps<{ isOpen: boolean; editTransactionId: number | null }>(),
@@ -101,7 +126,7 @@ const emits = defineEmits(["close"]);
 // Hook
 onBeforeMount(() => {
   financeService.getAllForSelect().then((res) => {
-    listInvestment = res.result;
+    listInvestment.value = res.result;
   });
 });
 
@@ -111,7 +136,10 @@ onUpdated(() => {
       transaction.value = res.result;
     });
   } else if (!props.editTransactionId && props.isOpen) {
-    transaction.value = {};
+    transaction.value = {
+      transactionTime: new Date(),
+      transactionType: transactionType.BUY,
+    };
   }
 });
 

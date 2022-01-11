@@ -1,19 +1,21 @@
+import moment from "moment";
+
 export default interface TransactionDto {
   id?: number;
   price?: number;
   numberOfShares?: number;
-  transactionTime?: Date;
-  createDate?: Date;
-  updateDate?: Date;
+  transactionTime: Date;
+  creationTime?: Date;
+  lastModificationTime?: Date;
   transactionType?: TransactionType;
   investmentId?: number;
 }
 
 export interface SearchTransactionInputDto {
   investmentId?: number;
-  fromTransactionDate?: Date;
-  toTransactionDate?: Date;
-  transactionType?: TransactionType;
+  fromTransactionDate?: string;
+  toTransactionDate?: string;
+  transactionType: number;
   skipCount: number;
   maxResultCount: number;
 }

@@ -39,6 +39,12 @@ const transactionService = {
     );
     return res.data;
   },
+  async delete(id: number): Promise<BaseResponseDto> {
+    var res = await ajax.delete(
+      `/api/services/app/Transaction/Delete?Id=${id}`,
+    );
+    return res.data;
+  },
 };
 
 export default transactionService;

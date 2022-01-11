@@ -16,7 +16,7 @@
         />
       </div>
       <div>
-        <button @click="login($event)">Login</button>
+        <button @click.prevent="login()">Login</button>
       </div>
     </form>
   </div>
@@ -32,13 +32,9 @@ let loginModel = ref<LoginModel>({
   password: null,
   rememberClient: false,
 });
-
-async function login($event: any) {
-  $event.preventDefault();
+let atagAttribute = "href";
+async function login() {
   await authService.login(loginModel.value);
-  // await router.push({
-  //   name: "finance",
-  // });
   location.reload();
 }
 </script>
