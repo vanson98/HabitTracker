@@ -11,6 +11,7 @@ namespace HabitTracker.Investing
         /// Mã cổ phiếu
         /// </summary>
         public string StockCode { get; set; }
+
         /// <summary>
         /// Tên công ty
         /// </summary>
@@ -27,6 +28,16 @@ namespace HabitTracker.Investing
         public float TotalMoneyBuy { get; set; }
 
         /// <summary>
+        /// Giá trung bình mỗi CP
+        /// </summary>
+        public decimal AveragePrice { get; set; }
+
+        /// <summary>
+        /// Giá cố phiếu hiện tại
+        /// </summary>
+        public float CurrentPrice { get; set; }
+
+        /// <summary>
         /// Tổng số lượng bán
         /// </summary>
         public float TotalAmountSell { get; set; }
@@ -35,11 +46,6 @@ namespace HabitTracker.Investing
         /// Tổng số tiền bán
         /// </summary>
         public float TotalMoneySell { get; set; }
-
-        /// <summary>
-        /// Giá cố phiếu hiện tại
-        /// </summary>
-        public float CurrentPrice { get; set; }
 
         /// <summary>
         /// Khối lượng cổ phiếu hiện thời
@@ -59,7 +65,7 @@ namespace HabitTracker.Investing
         /// <summary>
         /// Trạng thái
         /// </summary>
-        public InvestmentStatus Status { get; set; }
+        public InvestmentStatus Status { get; set; } = InvestmentStatus.NotActive;
 
 
         #region Foreign Key

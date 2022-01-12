@@ -1,8 +1,10 @@
 ﻿using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
+using Abp.UI;
 using HabitTracker.Investing.Dtos.InvestmentDtos;
 using HabitTracker.Investing.Dtos.TransactionDtos;
+using HabitTracker.Investing.Enum;
 using HabitTracker.Investing.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -65,25 +67,70 @@ namespace HabitTracker.Investing
                                      join c in _investmentChannelRepository.GetAll() on ivm.ChannelId equals c.Id
                                      where ivm.Id == transaction.Id
                                      select c).FirstOrDefaultAsync();
-            var fee = transaction.TransactionType == Enum.TransactionType.BUY ? investmentChannel.BuyFee : investmentChannel.SellFee;
+            var investment = await _investmentRepository.FirstOrDefaultAsync(transaction.InvestmentId);
+
+            // Cập nhật thông tin investment
+            if(investment != null && transaction.TransactionType == TransactionType.BUY)
+            {
+                investment.TotalAmountBuy += transaction.NumberOfShares;
+                investment.TotalMoneyBuy += (transaction.NumberOfShares * transaction.Price);
+                investment.AveragePrice =  (decimal)(investment.TotalMoneyBuy / investment.TotalAmountBuy);
+            }else if(investment != null && transaction.TransactionType == TransactionType.SELL)
+            {
+                
+                investment.TotalAmountSell += transaction.NumberOfShares;
+                investment.TotalMoneyBuy += (transaction.NumberOfShares * transaction.Price);
+                if (investment.TotalAmountSell > investment.TotalMoneyBuy)
+                {
+                    throw new UserFriendlyException("Không thể bán số lượng lớn hơn số lượng hiện có!");
+                }
+            }
+            if(investment.TotalAmountBuy == investment.TotalAmountSell)
+            {
+                investment.Status = InvestmentStatus.BuyOut;
+            }else{
+                investment.Status = InvestmentStatus.Active;
+            }
+            await _investmentRepository.UpdateAsync(investment);
+
+            // Cập nhật phí 
+            var fee = transaction.TransactionType == TransactionType.BUY ? investmentChannel.BuyFee : investmentChannel.SellFee;
             transaction.TotalFee = (transaction.NumberOfShares * transaction.Price) * fee / 100;
-            investmentChannel.Overheads += transaction.TotalFee;
-            _investmentChannelRepository.Update(investmentChannel);
+            if(transaction.TransactionType == TransactionType.BUY)
+            {
+                investmentChannel.TotalBuyFee += transaction.TotalFee;
+            }
+            else
+            {
+                investmentChannel.TotalSellFee += transaction.TotalFee;
+            }
+           
+            await _investmentChannelRepository.UpdateAsync(investmentChannel);
             return await base.CreateAsync(transaction);
         }
 
         public async override Task<TransactionDto> UpdateAsync(TransactionDto transaction)
         {
             var investmentChannel = await (from ivm in _investmentRepository.GetAll()
-                                     join c in _investmentChannelRepository.GetAll() on ivm.ChannelId equals c.Id
-                                     where ivm.Id == transaction.Id
-                                     select c).FirstOrDefaultAsync();
+                                           join c in _investmentChannelRepository.GetAll() on ivm.ChannelId equals c.Id
+                                           where ivm.Id == transaction.Id
+                                           select c).FirstOrDefaultAsync();
             // Trừ đi phí cũ
-            investmentChannel.Overheads -= transaction.TotalFee;
-            // Tính phí mới
-            var fee = transaction.TransactionType == Enum.TransactionType.BUY ? investmentChannel.BuyFee : investmentChannel.SellFee;
-            transaction.TotalFee = (transaction.NumberOfShares * transaction.Price) * fee / 100;
-            investmentChannel.Overheads += transaction.TotalFee;
+            var fee = 0f;
+            if (transaction.TransactionType == TransactionType.BUY)
+            {
+                fee = investmentChannel.BuyFee;
+                investmentChannel.TotalBuyFee -= transaction.TotalFee;
+                transaction.TotalFee = (transaction.NumberOfShares * transaction.Price) * fee / 100;
+                investmentChannel.TotalBuyFee += transaction.TotalFee;
+            }
+            else
+            {
+                fee = investmentChannel.SellFee;
+                investmentChannel.TotalSellFee -= transaction.TotalFee;
+                transaction.TotalFee = (transaction.NumberOfShares * transaction.Price) * fee / 100;
+                investmentChannel.TotalSellFee += transaction.TotalFee;
+            }
             _investmentChannelRepository.Update(investmentChannel);
             return await base.UpdateAsync(transaction);
         }
@@ -96,7 +143,14 @@ namespace HabitTracker.Investing
                                      join c in _investmentChannelRepository.GetAll() on ivm.ChannelId equals c.Id
                                      where ivm.Id == transaction.Id
                                      select c).FirstOrDefaultAsync();
-            investmentChannel.Overheads -= transaction.TotalFee;
+            if (transaction.TransactionType == Enum.TransactionType.BUY)
+            {
+                investmentChannel.TotalBuyFee -= transaction.TotalFee;
+            }
+            else
+            {
+                investmentChannel.TotalSellFee -= transaction.TotalFee;
+            }
             await _investmentChannelRepository.UpdateAsync(investmentChannel);
             await base.DeleteAsync(input);
         }

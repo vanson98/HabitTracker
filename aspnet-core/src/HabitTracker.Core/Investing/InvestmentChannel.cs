@@ -54,9 +54,15 @@ namespace HabitTracker.Investing
         public float SellFee { get; set; }
 
         /// <summary>
-        /// Tổng phí
+        /// Tổng phí mua
         /// </summary>
-        public float Overheads { get; set; }
+        public float TotalBuyFee { get; set; }
+
+        /// <summary>
+        /// Tổng phí bán
+        /// </summary>
+        public float TotalSellFee { get; set; }
+
         #region Foreign Key
         public IEnumerable<Investment> Investments { get; set; }
         #endregion

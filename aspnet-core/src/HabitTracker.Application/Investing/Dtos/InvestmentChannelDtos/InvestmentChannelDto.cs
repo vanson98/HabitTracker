@@ -26,6 +26,7 @@ namespace HabitTracker.Investing.Dtos.InvestmentChannelDtos
 
         public float PurchaseFee { get; set; }
 
-        public float Overheads { get; set; }
+        public float TotalBuyFee { get; set; }
+        public float TotalSellFee { get; set; }
     }
 }

@@ -1,27 +1,31 @@
 <template>
   <div>
     <!-- start control container -->
-    <div class="flex flex-row">
-      <div class="flex flex-col mx-2">
-        <label>Channel</label>
-        <el-select
-          placeholder="Chọn kênh đầu tư"
-          @change="getAllTransaction"
-          v-model="channelIdSelected"
-        >
-          <el-option
-            v-for="channel in listChannel"
-            :key="channel.id"
-            :label="channel.code + ' - ' + channel.name"
-            :value="channel.id"
-          ></el-option>
-        </el-select>
-      </div>
-      <div class="flex-grow" style="padding-top: 24px">
-        <el-button type="primary">Nhập tiền</el-button>
-        <el-button type="primary">Rút tiền</el-button>
-        <el-button type="primary">Cập nhật phí</el-button>
-      </div>
+    <div class="flex flex-row space-x-4">
+      <el-select
+        placeholder="Chọn kênh đầu tư"
+        @change="getAllTransaction"
+        v-model="channelIdSelected"
+        size="small"
+      >
+        <el-option
+          v-for="channel in listChannel"
+          :key="channel.id"
+          :label="channel.code + ' - ' + channel.name"
+          :value="channel.id"
+        ></el-option>
+      </el-select>
+      <el-input
+        placeholder="Nhập số liệu"
+        v-model="updateAmountInfo"
+        :type="'number'"
+        style="width: 200px"
+        size="small"
+      ></el-input>
+      <el-button type="primary" size="small">Add Money</el-button>
+      <el-button type="primary" size="small">Withdraw Money</el-button>
+      <el-button type="primary" size="small">Update Buy Fee</el-button>
+      <el-button type="primary" size="small">Update Sell Fee</el-button>
     </div>
     <!-- end control container -->
 
@@ -84,8 +88,7 @@
           end-placeholder="End date"
           :shortcuts="defaultTimeRange"
           @change="getAllTransaction"
-        >
-        </el-date-picker>
+        ></el-date-picker>
       </div>
       <div class="mt-auto flex-grow">
         <el-button @click="resetSearching" type="primary">Reset</el-button>
@@ -125,18 +128,20 @@
             >
           </template>
         </el-table-column>
-        <el-table-column prop="price" label="Giá (x1000đ)"> </el-table-column>
+        <el-table-column prop="price" label="Giá (x1000đ)"></el-table-column>
         <el-table-column
           prop="numberOfShares"
           label="Số lượng"
         ></el-table-column>
         <el-table-column label="Tổng tiền">
           <template #default="scope">
-            <span>{{
-              util.formatCurrency(
-                scope.row.numberOfShares * scope.row.price * 1000,
-              )
-            }}</span>
+            <span>
+              {{
+                util.formatCurrency(
+                  scope.row.numberOfShares * scope.row.price * 1000,
+                )
+              }}
+            </span>
           </template>
         </el-table-column>
         <el-table-column label="Thời gian giao dịch">
@@ -181,11 +186,10 @@
 
     <!-- dialogs -->
     <COETransactionDialog
-      :isOpen="isOpenDialog"
+      :isOpen="isOpenCOETransactionDialog"
       :editTransactionId="editTransactionId"
-      @close="closeDialog"
+      @close="onCloseCOETransactionDialog"
     ></COETransactionDialog>
-    <AddOrWithdrawMoneyDialog :isOpen="isOpenAddOrWithdrawMoney" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -252,10 +256,10 @@ let searchingInfo = ref<SearchTransactionInputDto>({
 let timeRangeSelect = ref("");
 let transactionType = TransactionType;
 let transactionTypeEnumKey = util.getEnumKeys(transactionType);
-
+let updateAmountInfo = ref();
 // dialog data
-let isOpenDialog = ref(false);
-let isOpenAddOrWithdrawMoney = ref(false);
+let isOpenCOETransactionDialog = ref(false);
+let isOpenAddOrWithdrawMoneyDialog = ref(false);
 let editTransactionId = ref<number | null>(null);
 
 const init = () => {
@@ -263,6 +267,7 @@ const init = () => {
     listChannel.value = res.result;
     if (listChannel.value.length > 0) {
       channelIdSelected.value = listChannel.value[0].id;
+      getAllInvestmentChannelInfo();
       getAllInvestment();
       getAllTransaction();
     }
@@ -274,6 +279,7 @@ onBeforeMount(() => {
   init();
 });
 
+// reset searching transaction info
 const resetSearching = () => {
   searchingInfo.value = {
     maxResultCount: pageSize,
@@ -282,6 +288,13 @@ const resetSearching = () => {
   };
   timeRangeSelect.value = "";
   getAllTransaction();
+};
+
+// Get all investment channel info
+const getAllInvestmentChannelInfo = () => {
+  investmentChannelService.getAllChannel().then((res) => {
+    listChannel.value = res.result;
+  });
 };
 
 // Page change
@@ -321,13 +334,13 @@ const getAllInvestment = () => {
 
 // Tạo mới transaction
 const createTransaction = () => {
-  isOpenDialog.value = true;
+  isOpenCOETransactionDialog.value = true;
   editTransactionId.value = null;
 };
 
 // Sửa transaction
 const editTransaction = (id: number) => {
-  isOpenDialog.value = true;
+  isOpenCOETransactionDialog.value = true;
   editTransactionId.value = id;
 };
 
@@ -366,10 +379,17 @@ const deleteTransaction = (id: number) => {
     });
 };
 
-const closeDialog = (isSuccess: boolean) => {
-  isOpenDialog.value = false;
+const onCloseCOETransactionDialog = (isSuccess: boolean) => {
+  isOpenCOETransactionDialog.value = false;
   if (isSuccess) {
     getAllTransaction();
+  }
+};
+
+const onCloseAddOrWithDrawMoneyDialog = (isSuccess: boolean) => {
+  isOpenAddOrWithdrawMoneyDialog.value = false;
+  if (isSuccess) {
+    getAllInvestmentChannelInfo();
   }
 };
 </script>
