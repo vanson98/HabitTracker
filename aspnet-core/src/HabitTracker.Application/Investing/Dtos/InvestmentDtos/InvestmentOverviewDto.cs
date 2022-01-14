@@ -1,6 +1,4 @@
-﻿using Abp.Application.Services.Dto;
-using Abp.AutoMapper;
-using HabitTracker.Investing.Enum;
+﻿using HabitTracker.Investing.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,16 +7,9 @@ using System.Threading.Tasks;
 
 namespace HabitTracker.Investing.Dtos.InvestmentDtos
 {
-    [AutoMapTo(typeof(Investment))]
-    [AutoMapFrom(typeof(Investment))]
-    public class InvestmentDto : EntityDto<int>
+    public class InvestmentOverviewDto
     {
         public string StockCode { get; set; }
-
-        /// <summary>
-        /// Tên công ty
-        /// </summary>
-        public string CompanyName { get; set; }
 
         /// <summary>
         /// Tổng số lượng cổ mua
@@ -56,18 +47,10 @@ namespace HabitTracker.Investing.Dtos.InvestmentDtos
         public long Vol { get; set; }
 
         /// <summary>
-        /// Mô tả 
-        /// </summary>
-        public string Description { get; set; }
-
-        /// <summary>
-        /// Kênh đầu tư
-        /// </summary>
-        public int ChannelId { get; set; }
-
-        /// <summary>
         /// Trạng thái
         /// </summary>
         public InvestmentStatus Status { get; set; }
+
+
     }
 }

@@ -74,17 +74,22 @@ namespace HabitTracker.Investing
             {
                 investment.TotalAmountBuy += transaction.NumberOfShares;
                 investment.TotalMoneyBuy += (transaction.NumberOfShares * transaction.Price);
+                investment.Vol += transaction.NumberOfShares;
                 investment.AveragePrice =  (decimal)(investment.TotalMoneyBuy / investment.TotalAmountBuy);
             }else if(investment != null && transaction.TransactionType == TransactionType.SELL)
             {
-                
-                investment.TotalAmountSell += transaction.NumberOfShares;
-                investment.TotalMoneyBuy += (transaction.NumberOfShares * transaction.Price);
-                if (investment.TotalAmountSell > investment.TotalMoneyBuy)
+                if (transaction.NumberOfShares < investment.Vol)
+                {
+                    investment.TotalAmountSell += transaction.NumberOfShares;
+                    investment.TotalMoneyBuy += (transaction.NumberOfShares * transaction.Price);
+                    investment.Vol -= transaction.NumberOfShares;
+                }
+                else
                 {
                     throw new UserFriendlyException("Không thể bán số lượng lớn hơn số lượng hiện có!");
                 }
             }
+
             if(investment.TotalAmountBuy == investment.TotalAmountSell)
             {
                 investment.Status = InvestmentStatus.BuyOut;
@@ -108,7 +113,7 @@ namespace HabitTracker.Investing
             await _investmentChannelRepository.UpdateAsync(investmentChannel);
             return await base.CreateAsync(transaction);
         }
-
+            
         public async override Task<TransactionDto> UpdateAsync(TransactionDto transaction)
         {
             var investmentChannel = await (from ivm in _investmentRepository.GetAll()

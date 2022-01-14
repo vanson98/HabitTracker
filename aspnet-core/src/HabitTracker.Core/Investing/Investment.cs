@@ -20,7 +20,7 @@ namespace HabitTracker.Investing
         /// <summary>
         /// Tổng số lượng cổ mua
         /// </summary>
-        public float TotalAmountBuy { get; set; }
+        public long TotalAmountBuy { get; set; }
 
         /// <summary>
         /// Tổng số tiền mua
@@ -40,7 +40,7 @@ namespace HabitTracker.Investing
         /// <summary>
         /// Tổng số lượng bán
         /// </summary>
-        public float TotalAmountSell { get; set; }
+        public long TotalAmountSell { get; set; }
 
         /// <summary>
         /// Tổng số tiền bán
@@ -50,7 +50,7 @@ namespace HabitTracker.Investing
         /// <summary>
         /// Khối lượng cổ phiếu hiện thời
         /// </summary>
-        public int Vol { get; set; }
+        public long Vol { get; set; }
 
         /// <summary>
         /// Mô tả 

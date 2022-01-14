@@ -1,4 +1,5 @@
 ﻿using Abp.Application.Services;
+using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
 using HabitTracker.Investing.Dtos.InvestmentDtos;
 using HabitTracker.Investing.Interface;
@@ -26,5 +27,7 @@ namespace HabitTracker.Investing
                 StockCode = ivm.StockCode
             }).ToList();
         }
+
+        
     }
 }
