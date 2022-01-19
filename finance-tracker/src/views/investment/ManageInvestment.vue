@@ -17,26 +17,67 @@
         </el-table-column>
         <el-table-column
           prop="stockCode"
-          label="Mã CK"
-          width="150"
+          label="Symbol"
+          width="100"
         ></el-table-column>
         <el-table-column
-          prop="companyName"
-          label="Tên công ty"
+          prop="totalAmountBuy"
+          label="Amount Buy"
+        ></el-table-column>
+        <el-table-column prop="totalMoneyBuy" label="Money Bought">
+          <template #default="scope">
+            <span>
+              {{ util.formatCurrency(scope.row.totalMoneyBuy * 1000) }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="capitalCost"
+          label="Capital Cost"
+          width="120"
+        ></el-table-column>
+        <el-table-column prop="vol" label="Vol" width="100"> </el-table-column>
+        <el-table-column
+          prop="marketPrice"
+          label="Market Price"
+          width="120"
         ></el-table-column>
         <el-table-column
-          prop="totalBuy"
-          label="Tổng số lượng mua"
+          prop="totalAmountSell"
+          label="Amount Sell"
         ></el-table-column>
-        <el-table-column
-          prop="totalSell"
-          label="Tổng số lượng bán"
-        ></el-table-column>
-        <el-table-column
-          prop="currentPrice"
-          label="Giá hiện tại"
-        ></el-table-column>
-        <el-table-column prop="vol" label="Số lượng hiện tại"></el-table-column>
+        <el-table-column prop="totalMoneySell" label="Money Sold">
+          <template #default="scope">
+            <span>
+              {{ util.formatCurrency(scope.row.totalMoneySell * 1000) }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="Status" width="80">
+          <template #default="scope">
+            <el-tag
+              v-if="scope.row.status == InvestmentStatus.NotActive"
+              class="ml-2"
+              type="info"
+              effect="dark"
+              >NA</el-tag
+            >
+            <el-tag
+              v-if="scope.row.status == InvestmentStatus.Active"
+              class="ml-2"
+              type="success"
+              effect="dark"
+              >AT</el-tag
+            >
+            <el-tag
+              v-if="scope.row.status == InvestmentStatus.BuyOut"
+              class="ml-2"
+              type="warning"
+              effect="dark"
+              >BO</el-tag
+            >
+          </template>
+        </el-table-column>
         <el-table-column label="Action" :align="'center'" width="180">
           <template #default="scope">
             <el-button size="small" @click="editInvestment(scope.row.id)"
@@ -72,9 +113,10 @@
 import { onMounted, ref } from "vue";
 import COEInvestmentDialog from "./COEInvestmentDialog.vue";
 import { ElButton } from "element-plus";
-import Investment from "@/models/investment/Investment";
-import financeService from "@/services/finance.service";
-
+import InvestmentDto from "@/models/investment/InvestmentDtos";
+import financeService from "@/services/investment.service";
+import { InvestmentStatus } from "@/models/investment/InvestmentDtos";
+import util from "@/lib/util";
 const pageSize = 10;
 let currentPage = ref(1);
 let totalCount = ref(0);
@@ -82,7 +124,7 @@ let totalCount = ref(0);
 let isOpenDialog = ref(false);
 let editInvestmentId = ref<number | null>(null);
 
-let listInvestment = ref<Investment[]>();
+let listInvestment = ref<InvestmentDto[]>();
 // event
 onMounted(() => {
   getAllInvestment();

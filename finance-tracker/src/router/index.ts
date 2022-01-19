@@ -49,7 +49,7 @@ router.beforeEach((to, from, next) => {
   } else if (to.name == "login" && util.sessionData.userId != null) {
     // TH user đã đăng nhập
     next({
-      name: "overview",
+      name: "transactions",
     });
   } else {
     // check quyền...

@@ -32,16 +32,6 @@ namespace HabitTracker.Investing
         /// Tiền mặt thực có
         /// </summary>
         public float MoneyStock { get; set; }
-      
-        /// <summary>
-        /// tài sản ròng (Money + giá trị các cổ phiếu)
-        /// </summary>
-        //public float NAV { get; set; }
-
-        /// <summary>
-        /// Giá trị thị trường CK
-        /// </summary>
-        public float MarketValueOfStocks { get; set; }
 
         /// <summary>
         /// Phí mua (%)

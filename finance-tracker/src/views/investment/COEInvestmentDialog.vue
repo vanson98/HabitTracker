@@ -5,7 +5,21 @@
     width="30%"
     @close="closeModel(false)"
   >
-    <div>
+    <div class="space-y-3">
+      <div class="flex flex-col">
+        <label>Kênh đầu tư</label>
+        <el-select
+          v-model="investmentData.channelId"
+          placeholder="Choose channel"
+        >
+          <el-option
+            v-for="channel in listChannel"
+            :key="channel.id"
+            :label="channel.code + '-' + channel.name"
+            :value="channel.id"
+          ></el-option>
+        </el-select>
+      </div>
       <div>
         <label>Mã cổ phiếu</label>
         <el-input
@@ -22,10 +36,7 @@
       </div>
       <div>
         <label>Giá hiện thời</label>
-        <el-input
-          v-model="investmentData.currentPrice"
-          type="number"
-        ></el-input>
+        <el-input v-model="investmentData.marketPrice" type="number"></el-input>
       </div>
       <div>
         <label>Mô tả</label>
@@ -44,8 +55,10 @@
   </el-dialog>
 </template>
 <script lang="ts" setup>
-import Investment from "@/models/investment/Investment";
-import financeService from "@/services/finance.service";
+import { CreateOrUpdateInvestmentDto } from "@/models/investment/InvestmentDtos";
+import { ChannelSellectDto } from "@/models/investment-channel/InvestmentChannelModels";
+import financeService from "@/services/investment.service";
+import investmentChannelService from "@/services/investment-channel.service";
 import { appStore } from "@/store/appStore";
 import { ElNotification } from "element-plus";
 import {
@@ -58,13 +71,11 @@ import {
   onActivated,
   onDeactivated,
   watch,
+  onBeforeMount,
 } from "vue";
 //data
-let investmentData = ref<Investment>({
-  companyName: "",
-  currentPrice: 0,
-  description: "",
-});
+let investmentData = ref<CreateOrUpdateInvestmentDto>({});
+let listChannel = ref<ChannelSellectDto[]>();
 // Prop
 const props = withDefaults(
   defineProps<{ isOpen: boolean; editInvestmentId: number | null }>(),
@@ -73,6 +84,16 @@ const props = withDefaults(
     editInvestmentId: null,
   },
 );
+
+// event
+onBeforeMount(() => {
+  investmentChannelService.getAllChannel().then((res) => {
+    listChannel.value = res.result;
+    if (listChannel.value.length > 0) {
+      investmentData.value.channelId = listChannel.value[0].id;
+    }
+  });
+});
 
 // watcher
 // watch(

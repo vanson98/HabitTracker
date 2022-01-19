@@ -31,14 +31,14 @@ namespace HabitTracker.Investing.Dtos.InvestmentDtos
         public float TotalMoneyBuy { get; set; }
 
         /// <summary>
-        /// Giá trung bình mỗi CP
+        /// Giá vốn
         /// </summary>
-        public decimal AveragePrice { get; set; }
+        public decimal CapitalCost { get; set; }
 
         /// <summary>
         /// Giá cố phiếu hiện tại
         /// </summary>
-        public float CurrentPrice { get; set; }
+        public float MarketPrice { get; set; }
 
         /// <summary>
         /// Tổng số lượng bán

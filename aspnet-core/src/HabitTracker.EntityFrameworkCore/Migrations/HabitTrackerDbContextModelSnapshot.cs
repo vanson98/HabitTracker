@@ -1645,7 +1645,7 @@ namespace HabitTracker.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<decimal>("AveragePrice")
+                    b.Property<decimal>("CapitalCost")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ChannelId")
@@ -1654,11 +1654,11 @@ namespace HabitTracker.Migrations
                     b.Property<string>("CompanyName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("CurrentPrice")
-                        .HasColumnType("real");
-
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<float>("MarketPrice")
+                        .HasColumnType("real");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -1703,9 +1703,6 @@ namespace HabitTracker.Migrations
 
                     b.Property<string>("ChannelCode")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<float>("MarketValueOfStocks")
-                        .HasColumnType("real");
 
                     b.Property<float>("MoneyInput")
                         .HasColumnType("real");

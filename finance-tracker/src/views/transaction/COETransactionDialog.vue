@@ -85,7 +85,7 @@
   </el-dialog>
 </template>
 <script lang="ts" setup>
-import InvestmentSelectDto from "@/models/investment/InvestmentSelectDto";
+import { InvestmentSelectDto } from "@/models/investment/InvestmentDtos";
 import util from "@/lib/util";
 import TransactionDto, {
   TransactionType,
@@ -100,17 +100,18 @@ import {
   onUpdated,
   onBeforeMount,
 } from "vue";
-import financeService from "@/services/finance.service";
+import financeService from "@/services/investment.service";
 
-//data
-
+// Data
 let listInvestment = ref<InvestmentSelectDto[]>();
 let transactionType = TransactionType;
 let transactionTypeEnumKey = util.getEnumKeys(transactionType);
 let transaction = ref<TransactionDto>({
   transactionTime: new Date(),
   transactionType: transactionType.BUY,
+  totalFee: 0,
 });
+
 // Prop
 const props = withDefaults(
   defineProps<{ isOpen: boolean; editTransactionId: number | null }>(),
@@ -139,6 +140,7 @@ onUpdated(() => {
     transaction.value = {
       transactionTime: new Date(),
       transactionType: transactionType.BUY,
+      totalFee: 0,
     };
   }
 });

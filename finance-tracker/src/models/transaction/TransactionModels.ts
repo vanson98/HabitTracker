@@ -9,6 +9,7 @@ export default interface TransactionDto {
   lastModificationTime?: Date;
   transactionType?: TransactionType;
   investmentId?: number;
+  totalFee: number;
 }
 
 export interface SearchTransactionInputDto {

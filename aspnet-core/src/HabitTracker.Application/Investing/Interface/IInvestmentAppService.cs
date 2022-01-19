@@ -1,4 +1,5 @@
-﻿using HabitTracker.Investing.Dtos.InvestmentDtos;
+﻿using Abp.Application.Services.Dto;
+using HabitTracker.Investing.Dtos.InvestmentDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,6 @@ namespace HabitTracker.Investing.Interface
     public interface IInvestmentAppService
     {
         public List<InvestmentSelectDto> GetAllForSelect();
-        public List<> MyProperty { get; set; }
+        public Task<PagedResultDto<InvestmentOverviewDto>> GetAllOverview(GetAllOverviewInputDto input);
     }
 }

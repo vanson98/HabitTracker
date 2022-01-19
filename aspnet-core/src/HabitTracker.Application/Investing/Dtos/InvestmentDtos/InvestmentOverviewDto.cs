@@ -24,12 +24,12 @@ namespace HabitTracker.Investing.Dtos.InvestmentDtos
         /// <summary>
         /// Giá trung bình mỗi CP
         /// </summary>
-        public decimal AveragePrice { get; set; }
+        public decimal CapitalCost { get; set; }
 
         /// <summary>
         /// Giá cố phiếu hiện tại
         /// </summary>
-        public float CurrentPrice { get; set; }
+        public float MarketPrice { get; set; }
 
         /// <summary>
         /// Tổng số lượng bán
@@ -51,6 +51,15 @@ namespace HabitTracker.Investing.Dtos.InvestmentDtos
         /// </summary>
         public InvestmentStatus Status { get; set; }
 
+        /// <summary>
+        /// Tiền lãi của số cổ hiện tại
+        /// </summary>
+        public float CurrentInterest { get; set; }
+        
+        /// <summary>
+        /// Tiền lãi số CP đã bán
+        /// </summary>
+        public float SellInterest { get; set; }
 
     }
 }

@@ -59,7 +59,7 @@
       </table>
     </div>
     <!-- end info container -->
-
+    <ManageInvestment></ManageInvestment>
     <!-- start search form -->
     <div class="my-2 flex flex-row">
       <div class="flex flex-col mx-2 w-1/4">
@@ -216,16 +216,17 @@ import TransactionDto, {
   SearchTransactionInputDto,
   TransactionType,
 } from "@/models/transaction/TransactionModels";
-import financeService from "@/services/finance.service";
+import financeService from "@/services/investment.service";
 import transactionService from "@/services/transaction.service";
 import investmentChannelService from "@/services/investment-channel.service";
 import { SearchTransactionOutputDto } from "@/models/transaction/TransactionModels";
-import InvestmentSelectDto from "@/models/investment/InvestmentSelectDto";
+import { InvestmentSelectDto } from "@/models/investment/InvestmentDtos";
 import util from "@/lib/util";
 import moment from "moment";
 import { ChannelSellectDto } from "@/models/investment-channel/InvestmentChannelModels";
 import AddOrWithdrawMoney from "./AddOrWithdrawMoneyDialog.vue";
 import AddOrWithdrawMoneyDialog from "./AddOrWithdrawMoneyDialog.vue";
+import ManageInvestment from "../investment/ManageInvestment.vue";
 
 // page data
 const pageSize = 10;

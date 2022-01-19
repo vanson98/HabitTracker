@@ -16,7 +16,7 @@ ajax.interceptors.request.use(function (config) {
   return config;
 });
 
-// Interceptor Reponse
+// Interceptor Response
 ajax.interceptors.response.use(
   (response) => {
     return response;

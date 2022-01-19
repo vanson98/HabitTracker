@@ -16,14 +16,14 @@ using System.Threading.Tasks;
 
 namespace HabitTracker.Investing
 {
-    public class TransactionAppService : AsyncCrudAppService<Transaction,TransactionDto>, ITransactionService
+    public class TransactionAppService : AsyncCrudAppService<Transaction, TransactionDto>, ITransactionService
     {
         private readonly IRepository<Investment, int> _investmentRepository;
         private readonly IRepository<InvestmentChannel, int> _investmentChannelRepository;
         private readonly IRepository<Transaction, int> _repository;
         public TransactionAppService(
             IRepository<Transaction, int> repository,
-            IRepository<Investment, int> investmentRepository, 
+            IRepository<Investment, int> investmentRepository,
             IRepository<InvestmentChannel, int> investmentChannelRepository) : base(repository)
         {
             _repository = repository;
@@ -55,7 +55,7 @@ namespace HabitTracker.Investing
                                      };
             var result = new PagedResultDto<SearchTransactionOutputDto>()
             {
-                Items = await listTransactionDto.OrderByDescending(t=>t.TransactionTime).Skip(input.SkipCount).Take(input.MaxResultCount).ToListAsync(),
+                Items = await listTransactionDto.OrderByDescending(t => t.TransactionTime).Skip(input.SkipCount).Take(input.MaxResultCount).ToListAsync(),
                 TotalCount = listTransactionDto.Count()
             };
             return result;
@@ -64,24 +64,25 @@ namespace HabitTracker.Investing
         public async override Task<TransactionDto> CreateAsync(TransactionDto transaction)
         {
             var investmentChannel = await (from ivm in _investmentRepository.GetAll()
-                                     join c in _investmentChannelRepository.GetAll() on ivm.ChannelId equals c.Id
-                                     where ivm.Id == transaction.Id
-                                     select c).FirstOrDefaultAsync();
+                                           join c in _investmentChannelRepository.GetAll() on ivm.ChannelId equals c.Id
+                                           where ivm.Id == transaction.InvestmentId
+                                           select c).FirstOrDefaultAsync();
             var investment = await _investmentRepository.FirstOrDefaultAsync(transaction.InvestmentId);
 
             // Cập nhật thông tin investment
-            if(investment != null && transaction.TransactionType == TransactionType.BUY)
+            if (investment != null && transaction.TransactionType == TransactionType.BUY)
             {
                 investment.TotalAmountBuy += transaction.NumberOfShares;
                 investment.TotalMoneyBuy += (transaction.NumberOfShares * transaction.Price);
                 investment.Vol += transaction.NumberOfShares;
-                investment.AveragePrice =  (decimal)(investment.TotalMoneyBuy / investment.TotalAmountBuy);
-            }else if(investment != null && transaction.TransactionType == TransactionType.SELL)
+                investment.CapitalCost = (decimal)(investment.TotalMoneyBuy / investment.TotalAmountBuy);
+            }
+            else if (investment != null && transaction.TransactionType == TransactionType.SELL)
             {
-                if (transaction.NumberOfShares < investment.Vol)
+                if (transaction.NumberOfShares <= investment.Vol)
                 {
                     investment.TotalAmountSell += transaction.NumberOfShares;
-                    investment.TotalMoneyBuy += (transaction.NumberOfShares * transaction.Price);
+                    investment.TotalMoneySell += (transaction.NumberOfShares * transaction.Price);
                     investment.Vol -= transaction.NumberOfShares;
                 }
                 else
@@ -90,10 +91,12 @@ namespace HabitTracker.Investing
                 }
             }
 
-            if(investment.TotalAmountBuy == investment.TotalAmountSell)
+            if (investment.TotalAmountBuy == investment.TotalAmountSell)
             {
                 investment.Status = InvestmentStatus.BuyOut;
-            }else{
+            }
+            else
+            {
                 investment.Status = InvestmentStatus.Active;
             }
             await _investmentRepository.UpdateAsync(investment);
@@ -101,7 +104,7 @@ namespace HabitTracker.Investing
             // Cập nhật phí 
             var fee = transaction.TransactionType == TransactionType.BUY ? investmentChannel.BuyFee : investmentChannel.SellFee;
             transaction.TotalFee = (transaction.NumberOfShares * transaction.Price) * fee / 100;
-            if(transaction.TransactionType == TransactionType.BUY)
+            if (transaction.TransactionType == TransactionType.BUY)
             {
                 investmentChannel.TotalBuyFee += transaction.TotalFee;
             }
@@ -109,45 +112,50 @@ namespace HabitTracker.Investing
             {
                 investmentChannel.TotalSellFee += transaction.TotalFee;
             }
-           
+
             await _investmentChannelRepository.UpdateAsync(investmentChannel);
             return await base.CreateAsync(transaction);
         }
-            
-        public async override Task<TransactionDto> UpdateAsync(TransactionDto transaction)
-        {
-            var investmentChannel = await (from ivm in _investmentRepository.GetAll()
-                                           join c in _investmentChannelRepository.GetAll() on ivm.ChannelId equals c.Id
-                                           where ivm.Id == transaction.Id
-                                           select c).FirstOrDefaultAsync();
-            // Trừ đi phí cũ
-            var fee = 0f;
-            if (transaction.TransactionType == TransactionType.BUY)
-            {
-                fee = investmentChannel.BuyFee;
-                investmentChannel.TotalBuyFee -= transaction.TotalFee;
-                transaction.TotalFee = (transaction.NumberOfShares * transaction.Price) * fee / 100;
-                investmentChannel.TotalBuyFee += transaction.TotalFee;
-            }
-            else
-            {
-                fee = investmentChannel.SellFee;
-                investmentChannel.TotalSellFee -= transaction.TotalFee;
-                transaction.TotalFee = (transaction.NumberOfShares * transaction.Price) * fee / 100;
-                investmentChannel.TotalSellFee += transaction.TotalFee;
-            }
-            _investmentChannelRepository.Update(investmentChannel);
-            return await base.UpdateAsync(transaction);
-        }
+
+
 
         public async override Task DeleteAsync(EntityDto<int> input)
         {
             var transaction = await _repository.FirstOrDefaultAsync(input.Id);
 
             var investmentChannel = await (from ivm in _investmentRepository.GetAll()
-                                     join c in _investmentChannelRepository.GetAll() on ivm.ChannelId equals c.Id
-                                     where ivm.Id == transaction.Id
-                                     select c).FirstOrDefaultAsync();
+                                           join c in _investmentChannelRepository.GetAll() on ivm.ChannelId equals c.Id
+                                           where ivm.Id == transaction.Id
+                                           select c).FirstOrDefaultAsync();
+
+            var investment = await _investmentRepository.FirstOrDefaultAsync(transaction.InvestmentId);
+
+            // Cập nhật thông tin investment
+            if (investment != null && transaction.TransactionType == TransactionType.BUY)
+            {
+                investment.TotalAmountBuy -= transaction.NumberOfShares;
+                investment.TotalMoneyBuy -= (transaction.NumberOfShares * transaction.Price);
+                investment.Vol -= transaction.NumberOfShares;
+                investment.CapitalCost = (decimal)(investment.TotalMoneyBuy / investment.TotalAmountBuy);
+            }
+            else if (investment != null && transaction.TransactionType == TransactionType.SELL)
+            {
+                investment.TotalAmountSell -= transaction.NumberOfShares;
+                investment.TotalMoneySell -= (transaction.NumberOfShares * transaction.Price);
+                investment.Vol += transaction.NumberOfShares;
+            }
+
+            if (investment.TotalAmountBuy == investment.TotalAmountSell)
+            {
+                investment.Status = InvestmentStatus.BuyOut;
+            }
+            else
+            {
+                investment.Status = InvestmentStatus.Active;
+            }
+            await _investmentRepository.UpdateAsync(investment);
+
+            // Cập nhật lại phí
             if (transaction.TransactionType == Enum.TransactionType.BUY)
             {
                 investmentChannel.TotalBuyFee -= transaction.TotalFee;
