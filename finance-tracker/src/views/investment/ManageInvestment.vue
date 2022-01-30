@@ -1,8 +1,5 @@
 <template>
   <div>
-    <div class="my-2">
-      <el-button @click="createInvestment">Create Investment</el-button>
-    </div>
     <div class="table-ctn">
       <el-table
         :data="listInvestment"
@@ -35,12 +32,20 @@
           prop="capitalCost"
           label="Capital Cost"
           width="120"
+          :class-name="'mid-col-highlight'"
         ></el-table-column>
-        <el-table-column prop="vol" label="Vol" width="100"> </el-table-column>
+        <el-table-column
+          prop="vol"
+          label="Vol"
+          width="100"
+          :class-name="'mid-col-highlight'"
+        >
+        </el-table-column>
         <el-table-column
           prop="marketPrice"
           label="Market Price"
           width="120"
+          :class-name="'mid-col-highlight'"
         ></el-table-column>
         <el-table-column
           prop="totalAmountSell"
@@ -169,4 +174,8 @@ const closeDialog = (isSuccess: boolean) => {
   }
 };
 </script>
-<style></style>
+<style>
+.mid-col-highlight {
+  background-color: #53d99e !important;
+}
+</style>

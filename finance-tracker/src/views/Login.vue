@@ -23,7 +23,7 @@
 </template>
 <script lang="ts" setup>
 import router from "@/router";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import authService from "@/services/auth.service";
 import LoginModel from "@/models/LoginModel";
 
@@ -32,7 +32,7 @@ let loginModel = ref<LoginModel>({
   password: null,
   rememberClient: false,
 });
-let atagAttribute = "href";
+
 async function login() {
   await authService.login(loginModel.value);
   location.reload();

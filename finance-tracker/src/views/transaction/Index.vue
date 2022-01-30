@@ -1,120 +1,5 @@
 <template>
   <div>
-    <!-- start control container -->
-    <div class="flex flex-row space-x-4">
-      <el-select
-        placeholder="Chọn kênh đầu tư"
-        @change="getAllTransaction"
-        v-model="channelIdSelected"
-        size="small"
-      >
-        <el-option
-          v-for="channel in listChannel"
-          :key="channel.id"
-          :label="channel.code + ' - ' + channel.name"
-          :value="channel.id"
-        ></el-option>
-      </el-select>
-      <el-input
-        placeholder="Nhập số liệu"
-        v-model="updateAmountInfo"
-        :type="'number'"
-        style="width: 200px"
-        size="small"
-      ></el-input>
-      <el-button type="primary" size="small">Add Money</el-button>
-      <el-button type="primary" size="small">Withdraw Money</el-button>
-      <el-button type="primary" size="small">Update Buy Fee</el-button>
-      <el-button type="primary" size="small">Update Sell Fee</el-button>
-    </div>
-    <!-- end control container -->
-
-    <!-- start info container -->
-    <div>
-      <table class="w-full">
-        <tr>
-          <td>Tổng tiền nhập vào</td>
-          <td class="float-left">12</td>
-          <td>Tiền mặt thực có</td>
-          <td>10</td>
-          <td>Tổng tiền rút ra</td>
-          <td>13</td>
-        </tr>
-        <tr>
-          <td>Tông giá giá trị CP (lúc mua)</td>
-          <td class="float-left">12</td>
-          <td>Tống giá trị thị trường (hiện tại)</td>
-          <td>10</td>
-          <td>Lãi/lỗ</td>
-          <td>13</td>
-        </tr>
-        <tr>
-          <td>Tài sản ròng (NAV)</td>
-          <td>13</td>
-          <td>Tổng phí mua / bán</td>
-          <td>10</td>
-          <td>Phí bán / mua</td>
-          <td>13</td>
-        </tr>
-      </table>
-    </div>
-    <!-- end info container -->
-    <ManageInvestment></ManageInvestment>
-    <!-- start search form -->
-    <div class="my-2 flex flex-row">
-      <div class="flex flex-col mx-2 w-1/4">
-        <label>Stock Code</label>
-        <el-select
-          v-model="searchingInfo.investmentId"
-          placeholder="Nhập mã CP"
-          @change="getAllTransaction"
-        >
-          <el-option
-            v-for="item in listInvestment"
-            :key="item.id"
-            :value="item.id"
-            :label="item.stockCode + ' - ' + item.companyName"
-          ></el-option>
-        </el-select>
-      </div>
-      <div class="flex flex-col mx-2">
-        <label>Transaction Type</label>
-        <el-select
-          v-model="searchingInfo.transactionType"
-          placeholder="Chọn loại giao dịch"
-          @change="getAllTransaction"
-        >
-          <el-option :label="'ALL'" :value="-1"></el-option>
-          <el-option
-            v-for="keyEnum in transactionTypeEnumKey"
-            :key="keyEnum"
-            :label="keyEnum"
-            :value="transactionType[keyEnum]"
-          ></el-option>
-        </el-select>
-      </div>
-      <div class="flex flex-col mx-2">
-        <label class="demonstration">Time Range</label>
-        <el-date-picker
-          v-model="timeRangeSelect"
-          type="daterange"
-          unlink-panels
-          range-separator="To"
-          start-placeholder="Start date"
-          end-placeholder="End date"
-          :shortcuts="defaultTimeRange"
-          @change="getAllTransaction"
-        ></el-date-picker>
-      </div>
-      <div class="mt-auto flex-grow">
-        <el-button @click="resetSearching" type="primary">Reset</el-button>
-        <el-button @click="createTransaction" class="float-right" type="primary"
-          >Add Transaction</el-button
-        >
-      </div>
-    </div>
-    <!-- end search form -->
-
     <!-- start table content -->
     <div class="table-ctn">
       <el-table
@@ -209,86 +94,38 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, ref, defineProps } from "vue";
 import COETransactionDialog from "./COETransactionDialog.vue";
 import { ElButton, ElMessage, ElMessageBox } from "element-plus";
 import TransactionDto, {
   SearchTransactionInputDto,
   TransactionType,
 } from "@/models/transaction/TransactionModels";
-import financeService from "@/services/investment.service";
+
 import transactionService from "@/services/transaction.service";
-import investmentChannelService from "@/services/investment-channel.service";
 import { SearchTransactionOutputDto } from "@/models/transaction/TransactionModels";
-import { InvestmentSelectDto } from "@/models/investment/InvestmentDtos";
 import util from "@/lib/util";
 import moment from "moment";
-import { ChannelSellectDto } from "@/models/investment-channel/InvestmentChannelModels";
-import AddOrWithdrawMoney from "./AddOrWithdrawMoneyDialog.vue";
-import AddOrWithdrawMoneyDialog from "./AddOrWithdrawMoneyDialog.vue";
-import ManageInvestment from "../investment/ManageInvestment.vue";
 
+// props
+let props = defineProps<{
+  investmentIdSelected: number | null;
+  transactionType: number;
+  timeRangeSelected: string | Array<any>;
+}>();
 // page data
 const pageSize = 10;
-const defaultTimeRange = [
-  {
-    text: "Last week",
-    value: () => {
-      const end = new Date();
-      const start = new Date();
-      start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-      return [start, end];
-    },
-  },
-  {
-    text: "Last month",
-    value: () => {
-      const end = new Date();
-      const start = new Date();
-      start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-      return [start, end];
-    },
-  },
-  {
-    text: "Last 3 months",
-    value: () => {
-      const end = new Date();
-      const start = new Date();
-      start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-      return [start, end];
-    },
-  },
-];
-let listChannel = ref<ChannelSellectDto[]>();
-let channelIdSelected = ref();
+let transactionType = TransactionType;
 let currentPage = ref(1);
 let totalCount = ref(0);
 let listTransaction = ref<SearchTransactionOutputDto[]>();
-let listInvestment = ref<InvestmentSelectDto[]>();
-let searchingInfo = ref<SearchTransactionInputDto>({
-  maxResultCount: pageSize,
-  skipCount: 0,
-  transactionType: -1,
-});
-let timeRangeSelect = ref("");
-let transactionType = TransactionType;
-let transactionTypeEnumKey = util.getEnumKeys(transactionType);
-let updateAmountInfo = ref();
 // dialog data
 let isOpenCOETransactionDialog = ref(false);
 let isOpenAddOrWithdrawMoneyDialog = ref(false);
 let editTransactionId = ref<number | null>(null);
 
 const init = () => {
-  investmentChannelService.getAllChannel().then((res) => {
-    listChannel.value = res.result;
-    if (listChannel.value.length > 0) {
-      channelIdSelected.value = listChannel.value[0].id;
-      getAllInvestmentChannelInfo();
-      getAllInvestment();
-      getAllTransaction();
-    }
-  });
+  getAllTransaction();
 };
 
 // Event
@@ -296,23 +133,7 @@ onBeforeMount(() => {
   init();
 });
 
-// reset searching transaction info
-const resetSearching = () => {
-  searchingInfo.value = {
-    maxResultCount: pageSize,
-    skipCount: 0,
-    transactionType: -1,
-  };
-  timeRangeSelect.value = "";
-  getAllTransaction();
-};
-
 // Get all investment channel info
-const getAllInvestmentChannelInfo = () => {
-  investmentChannelService.getAllChannel().then((res) => {
-    listChannel.value = res.result;
-  });
-};
 
 // Page change
 const pageChange = (page: number) => {
@@ -322,17 +143,22 @@ const pageChange = (page: number) => {
 
 // Get All Transaction
 const getAllTransaction = () => {
-  if (timeRangeSelect.value != "" && timeRangeSelect.value.length == 2) {
-    searchingInfo.value.fromTransactionDate = moment(
-      timeRangeSelect.value[0],
+  var searchingInfo: SearchTransactionInputDto = {
+    skipCount: (currentPage.value - 1) * pageSize,
+    maxResultCount: pageSize,
+    transactionType: props.transactionType,
+    investmentId: props.investmentIdSelected,
+  };
+  if (props.timeRangeSelected != "" && props.timeRangeSelected.length == 2) {
+    searchingInfo["fromTransactionDate"] = moment(
+      props.timeRangeSelected[0],
     ).toISOString();
-    searchingInfo.value.toTransactionDate = moment(
-      timeRangeSelect.value[1],
+    searchingInfo["toTransactionDate"] = moment(
+      props.timeRangeSelected[1],
     ).toISOString();
   }
-  searchingInfo.value.skipCount = (currentPage.value - 1) * pageSize;
   transactionService
-    .searchPaging(searchingInfo.value)
+    .searchPaging(searchingInfo)
     .then((res) => {
       listTransaction.value = res.result.items;
       totalCount.value = res.result.totalCount;
@@ -340,13 +166,6 @@ const getAllTransaction = () => {
     .catch(() => {
       alert("Đã có lỗi xảy ra");
     });
-};
-
-// Get all investment
-const getAllInvestment = () => {
-  financeService.getAllForSelect().then((res) => {
-    listInvestment.value = res.result;
-  });
 };
 
 // Tạo mới transaction
@@ -400,13 +219,6 @@ const onCloseCOETransactionDialog = (isSuccess: boolean) => {
   isOpenCOETransactionDialog.value = false;
   if (isSuccess) {
     getAllTransaction();
-  }
-};
-
-const onCloseAddOrWithDrawMoneyDialog = (isSuccess: boolean) => {
-  isOpenAddOrWithdrawMoneyDialog.value = false;
-  if (isSuccess) {
-    getAllInvestmentChannelInfo();
   }
 };
 </script>

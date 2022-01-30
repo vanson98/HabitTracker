@@ -10,8 +10,12 @@ import ajax from "../lib/ajax";
 
 const investmentService = {
   // get all for select
-  async getAllForSelect(): Promise<DataResponseDto<InvestmentSelectDto[]>> {
-    const res = await ajax.get("/api/services/app/investment/GetAllForSelect");
+  async getAllForSelect(
+    channelId: number,
+  ): Promise<DataResponseDto<InvestmentSelectDto[]>> {
+    const res = await ajax.get(
+      "/api/services/app/investment/GetAllForSelect?channelId" + channelId,
+    );
     return res.data;
   },
   // Get all paging
