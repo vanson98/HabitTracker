@@ -4,7 +4,7 @@
     <div class="flex flex-row space-x-4">
       <el-select
         placeholder="Chọn kênh đầu tư"
-        @change="getAllTransaction"
+        @change="getAllInvestmentForSelect"
         v-model="channelIdSelected"
         size="small"
       >
@@ -137,15 +137,15 @@ import { InvestmentSelectDto } from "@/models/investment/InvestmentDtos";
 import investmentService from "@/services/investment.service";
 import util from "@/lib/util";
 
-// Channel data
+// channel data
 let listChannel = ref<ChannelSellectDto[]>();
 let channelIdSelected = ref();
-// Search investment data
+
+// search investment data
 let listSelectInvestment = ref<InvestmentSelectDto[]>();
 let transactionType = TransactionType;
 let transactionTypeEnumKey = util.getEnumKeys(transactionType);
 let searchingInfo = ref<SearchTransactionInputDto>({
-  investmentId: null,
   maxResultCount: 10,
   skipCount: 0,
   transactionType: -1,
@@ -181,6 +181,9 @@ const defaultTimeRange = [
 ];
 let timeRangeSelect = ref("");
 
+// channel data
+let updateAmountInfo = ref(0);
+
 const init = () => {
   investmentChannelService.getAllChannel().then((res) => {
     listChannel.value = res.result;
@@ -206,7 +209,7 @@ const getAllInvestmentChannelInfo = () => {
 
 // Get all investment for select
 const getAllInvestmentForSelect = () => {
-  investmentService.getAllForSelect().then((res) => {
+  investmentService.getAllForSelect(channelIdSelected.value).then((res) => {
     listSelectInvestment.value = res.result;
   });
 };
@@ -214,7 +217,6 @@ const getAllInvestmentForSelect = () => {
 // reset searching transaction info
 const resetSearching = () => {
   searchingInfo.value = {
-    investmentId: null,
     maxResultCount: 10,
     skipCount: 0,
     transactionType: -1,

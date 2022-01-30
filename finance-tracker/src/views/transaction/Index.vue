@@ -109,7 +109,7 @@ import moment from "moment";
 
 // props
 let props = defineProps<{
-  investmentIdSelected: number | null;
+  investmentIdSelected: number | undefined;
   transactionType: number;
   timeRangeSelected: string | Array<any>;
 }>();
