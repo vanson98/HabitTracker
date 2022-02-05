@@ -1569,6 +1569,9 @@ namespace HabitTracker.Migrations
                     b.Property<int>("HabitLogType")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsLogDaily")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
@@ -1596,12 +1599,20 @@ namespace HabitTracker.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("ColorCode")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("Description")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<float>("GoalTime")
                         .HasColumnType("real");
+
+                    b.Property<string>("IconCode")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Name")
                         .HasMaxLength(255)

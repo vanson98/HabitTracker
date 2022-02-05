@@ -25,7 +25,8 @@ export class CreateOrEditHabitDialogComponent implements OnInit {
   saving = false;
   listHabitCategory : HabitCategoryDto[] 
  
-  @Output() onSave = new EventEmitter<any>();
+  @Output() onCreated = new EventEmitter<any>();
+  @Output() onUpdated = new EventEmitter<any>();
 
   constructor(public bsModalRef: BsModalRef,
     public _habitService: HabitServiceProxy,
@@ -56,7 +57,7 @@ export class CreateOrEditHabitDialogComponent implements OnInit {
         () => {
           this.notify.info("Cập nhật thành công");
           this.bsModalRef.hide();
-          this.onSave.emit();
+          this.onUpdated.emit(this.habitId);
         },
         () => {
           this.saving = false;
@@ -64,10 +65,10 @@ export class CreateOrEditHabitDialogComponent implements OnInit {
       )
     }else{
       this._habitService.create(this.habitDto).subscribe(
-        () => {
+        (res) => {
           this.notify.info("Tạo mới thành công");
           this.bsModalRef.hide();
-          this.onSave.emit();
+          this.onCreated.emit(res.id);
         },
         () => {
           this.saving = false;

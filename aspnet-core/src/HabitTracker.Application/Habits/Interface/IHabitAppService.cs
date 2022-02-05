@@ -14,6 +14,8 @@ namespace HabitTracker.Habits.Interface
         Task<ICollection<HabitDto>> GetAllNoPaging(string keyword,int? categoryId);
         Task<BaseReponseDto> LogWork(LogWorkInputDto input);
         Task<List<GetAllHabitLogOutputDto>> GetAllHabitLogInYear(int habitId, int year);
-        Task<List<HabitLogColumnChartDto>> GetHabitLogByTime(int habitId, int monthAmount);
+        Task<List<HabitLogColumnChartDto>> GetHabitLogByTime(int habitId, int dayAmount);
+        Task<List<TaskDto>> GetAllTasks(bool isDaily);
+        Task<List<HabitLogColumnChartDto>> GetTotalWorkingOfEachDay(int dayAmount);
     }
 }

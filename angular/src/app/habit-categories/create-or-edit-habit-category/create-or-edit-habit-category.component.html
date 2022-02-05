@@ -73,7 +73,36 @@
         ></abp-validation-summary>
       </div>
     </div>
-   
+    <div class="form-group row">
+      <label class="col-md-3 col-form-label" for="description">
+        {{ "Color code" | localize }}
+      </label>
+      <div class="col-md-9">
+        <input
+          type="text"
+          class="form-control"
+          name="colorcode"
+          id="colorcode"
+          maxlength="20"
+          [(ngModel)]="habitcategory.colorCode"
+        />
+      </div>
+    </div>
+    <div class="form-group row">
+      <label class="col-md-3 col-form-label" for="description">
+        {{ "Icon code" | localize }}
+      </label>
+      <div class="col-md-9">
+        <input
+          type="text"
+          class="form-control"
+          name="iconcode"
+          id="iconcode"
+          maxlength="200"
+          [(ngModel)]="habitcategory.iconCode"
+        />
+      </div>
+    </div>
   </div>
   <abp-modal-footer
     [cancelDisabled]="saving"

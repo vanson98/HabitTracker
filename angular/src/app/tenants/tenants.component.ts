@@ -10,6 +10,7 @@ import {
   TenantServiceProxy,
   TenantDto,
   TenantDtoPagedResultDto,
+  HabitCategoryAnalysisDto,
 } from '@shared/service-proxies/service-proxies';
 import { CreateTenantDialogComponent } from './create-tenant/create-tenant-dialog.component';
 import { EditTenantDialogComponent } from './edit-tenant/edit-tenant-dialog.component';
@@ -28,7 +29,6 @@ export class TenantsComponent extends PagedListingComponentBase<TenantDto> {
   keyword = '';
   isActive: boolean | null;
   advancedFiltersVisible = false;
-
   constructor(
     injector: Injector,
     private _tenantService: TenantServiceProxy,
@@ -116,7 +116,7 @@ export class TenantsComponent extends PagedListingComponentBase<TenantDto> {
       this.refresh();
     });
   }
-
+ 
   clearFilters(): void {
     this.keyword = '';
     this.isActive = undefined;

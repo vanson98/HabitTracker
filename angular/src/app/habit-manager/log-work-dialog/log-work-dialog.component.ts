@@ -3,7 +3,7 @@ import {
   HabitLogType,
   HabitServiceProxy,
 } from "./../../../shared/service-proxies/service-proxies";
-import { Component, OnInit } from "@angular/core";
+import { Component, EventEmitter, OnInit, Output } from "@angular/core";
 import { LogWorkInputDto } from "@shared/service-proxies/service-proxies";
 import { BsModalRef } from "ngx-bootstrap/modal";
 import * as moment from "moment";
@@ -21,6 +21,7 @@ export class LogWorkDialogComponent implements OnInit {
   workLog: LogWorkInputDto;
   workLogStatus: boolean = true;
   dateLogData: Date = new Date();
+  @Output() onSave = new EventEmitter<any>();
 
   constructor(public bsModalRef: BsModalRef,private _habitService: HabitServiceProxy, public notify: NotifyService) {}
 
@@ -36,13 +37,14 @@ export class LogWorkDialogComponent implements OnInit {
       : HabitLogStatus._0;
     this.workLog.dateLog = moment(this.dateLogData);
     this._habitService.logWork(this.workLog).subscribe((res)=>{
+      this.saving  = false;
+      this.bsModalRef.hide();
       if(res.statusCode == 200){
         this.notify.success(res.message);
+        this.onSave.emit(this.workLog.timeLog);
       }else{
         this.notify.error(res.message);
       }
-      this.saving  = false;
-      this.bsModalRef.hide();
     });
   }
 }

@@ -69,13 +69,10 @@ export class HabitCategoriesComponent extends PagedListingComponentBase<HabitCat
         if (result) {
           this._habitcategoryService
             .delete(habitcategory.id)
-            .pipe(
-              finalize(() => {
-                abp.notify.success(this.l('SuccessfullyDeleted'));
+            .subscribe(() => {
+              abp.notify.success(this.l('SuccessfullyDeleted'));
                 this.refresh();
-              })
-            )
-            .subscribe(() => {});
+            });
         }
       }
     );

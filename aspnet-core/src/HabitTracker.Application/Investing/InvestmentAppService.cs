@@ -10,7 +10,11 @@ using System.Threading.Tasks;
 
 namespace HabitTracker.Investing
 {
-    public class InvestmentAppService : AsyncCrudAppService<Investment, InvestmentDto, int, PagedAndSortedResultRequestDto, CreateOrUpdateInvestmentDto, CreateOrUpdateInvestmentDto>, IInvestmentAppService
+    public class InvestmentAppService : AsyncCrudAppService<Investment, InvestmentDto, int, 
+        PagedAndSortedResultRequestDto, 
+        CreateOrUpdateInvestmentDto, 
+        CreateOrUpdateInvestmentDto>, 
+        IInvestmentAppService
     {
         public IRepository<Investment, int> _repository { get; set; }
         private readonly IRepository<InvestmentChannel, int> _investmentChannelRepository;
@@ -67,5 +71,6 @@ namespace HabitTracker.Investing
             };
             return result;
         }
+
     }
 }

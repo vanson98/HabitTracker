@@ -10,7 +10,7 @@ namespace HabitTracker.Investing.Interface
 {
     public interface IInvestmentAppService
     {
-        public List<InvestmentSelectDto> GetAllForSelect();
+        public List<InvestmentSelectDto> GetAllForSelect(int channelId);
         public Task<PagedResultDto<InvestmentOverviewDto>> GetAllOverview(GetAllOverviewInputDto input);
     }
 }

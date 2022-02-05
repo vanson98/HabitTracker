@@ -15,5 +15,8 @@ namespace HabitTracker.Habits.Dtos
         public string Name { get; set; }
         public float GoalTime { get; set; }
         public string Description { get; set; }
+        public string ColorCode { get; set; }
+
+        public string IconCode { get; set; }
     }
 }

@@ -19,7 +19,7 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
     menuItemsMap: { [key: number]: MenuItem } = {};
     activatedMenuItems: MenuItem[] = [];
     routerEvents: BehaviorSubject<RouterEvent> = new BehaviorSubject(undefined);
-    homeRoute = '/app/habits';
+    homeRoute = '/app/home';
 
     constructor(injector: Injector, private router: Router) {
         super(injector);
@@ -43,9 +43,9 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
 
     getMenuItems(): MenuItem[] {
         return [
-            new MenuItem(this.l('HomePage'), '/app/home', 'fas fa-home'),
+            new MenuItem('Overview', '/app/home', 'fab fa-codepen'),
             new MenuItem('Habit Traker','/app/habits','far fa-calendar-check'),
-            new MenuItem('Habit Category','/app/habitcategories','far fa-calendar-check'),
+            new MenuItem('Habit Category','/app/habitcategories','far fa-address-card'),
             new MenuItem(
                 this.l('Roles'),
                 '/app/roles',

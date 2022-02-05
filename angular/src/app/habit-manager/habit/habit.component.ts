@@ -61,6 +61,7 @@ export class HabitComponent implements OnInit {
   @ViewChild("chart") chart: ChartComponent;
   @Input("habit-dto") habitDto: HabitDto;
   @Output() onEditHabitBtnClick = new EventEmitter();
+  @Output() onLogWorkSuccess = new EventEmitter();
 
   heatMapChartOptions: Partial<HeatMapChartOptions>;
   multipleYAxisChartOption: Partial<MultipleYAxisChartOptions>;
@@ -82,6 +83,7 @@ export class HabitComponent implements OnInit {
     this.progressValue = (this.habitDto.practiceTime * 100) / this.habitDto.timeGoal;
     this.setUpHeatMapChartOption();
     this.setMultipleYAxisChartOptions();
+    this.showDetailChart();
   }
 
   getRangeYear(){
@@ -128,17 +130,7 @@ export class HabitComponent implements OnInit {
     return series;
   }
 
-  // Lấy thông tin của habit
-  getHabitInfo() {
-    this._habitService.get(this.habitDto.id).subscribe(
-      (res) => {
-        this.habitDto = res;
-      },
-      (err) => {
-        console.log(err);
-      }
-    );
-  }
+ 
 
   // Sửa habit
   editHabit() {
@@ -316,6 +308,11 @@ export class HabitComponent implements OnInit {
         },
       }
     );
+    logWorkDialog.content.onSave.subscribe((timeLog) => {
+      this.getAllHabitLogDataByYear();
+      this.getAllHabitLogInDuration();
+      this.onLogWorkSuccess.emit(timeLog)
+    });
   }
 
 }

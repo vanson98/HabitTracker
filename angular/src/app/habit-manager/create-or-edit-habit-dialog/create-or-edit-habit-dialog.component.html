@@ -124,6 +124,12 @@
         ></textarea>
       </div>
     </div>
+    <div class="form-group row">
+      <label class="col-md-3 col-form-label">Có log hằng ngày</label>
+      <div class="col-md-9">
+        <input type="checkbox" style="width: 20px; height: 20px;" [(ngModel)]="habitDto.isLogDaily" name="isLogDaily">
+      </div>
+    </div>
   </div>
   <abp-modal-footer
     [cancelDisabled]="saving"

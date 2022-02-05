@@ -8,9 +8,18 @@ namespace HabitTracker.Habits
     {
         [StringLength(255)]
         public string Name { get; set; }
+
         [StringLength(255)]
         public string Description { get; set; }
+
         public float GoalTime { get; set; }
+
+        [StringLength(20)]
+        public string ColorCode { get; set; }
+
+        [StringLength(20)]
+        public string IconCode { get; set; }
+
         public virtual ICollection<Habit> Habits { get; set; }
     }
 }

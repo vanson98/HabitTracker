@@ -26,7 +26,7 @@
                 type="text"
                 [(ngModel)]="searchKeyWord"
                 placeholder="search..."
-                (keyup)="getAllHabits()"
+                (keyup.enter)="getAllHabits()"
               />
             </div>
             <div class="col-md-5">
@@ -34,11 +34,11 @@
               <select
                 id="habitcategory"
                 class="form-select form-control"
-                [(ngModel)]="categorySelected"
+                [(ngModel)]="categoryIdSelected"
                 name="habitcategory"
-                (change)="getAllHabits()"
+                (change)="onHabitCategoryChange()"
               >
-                <option value="-1" >Tất cả</option>
+                <option value="-1">Tất cả</option>
                 <option
                   [value]="category.id"
                   *ngFor="let category of listHabitCategory"
@@ -47,8 +47,33 @@
                 </option>
               </select>
             </div>
-            <div class="col-md-1" style="margin-top: 31px;">
-                <button class="btn btn-primary" (click)="resetSearching()">Reset</button>
+            <div class="col-md-1" style="margin-top: 31px">
+              <button class="btn btn-primary" (click)="resetSearching()">
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div
+            *ngIf="categoryIdSelected != -1 && categorySelected != null"
+            style="height: 110px"
+            class="mt-2 mb-2"
+          >
+            <div>
+              <strong>Số giờ đã làm:</strong>
+              {{ (categorySelected.totalPracticeTime / 60).toFixed(2) }} giờ ({{
+                categoryPracticePercent
+              }}%) - ({{
+                (categorySelected.totalPracticeTime / 60 / 24).toFixed(2)
+              }}
+              ngày)
+            </div>
+            <div><strong>Mục tiêu: </strong>{{categorySelected.goalTime/60}} giờ</div>
+            <p><strong>Mô tả:</strong> {{ categorySelected.description }}</p>
+            <div class="mb-3">
+              <progressbar [value]="categoryPracticePercent"
+                >{{ categoryPracticePercent }}%</progressbar
+              >
             </div>
           </div>
         </div>
@@ -59,9 +84,10 @@
     <div class="container-fluid">
       <div class="p-3">
         <app-habit
-          *ngFor="let habit of habits"
+          *ngFor="let habit of habits; trackBy: trackerHabitList"
           [habit-dto]="habit"
           (onEditHabitBtnClick)="editHabit($event)"
+          (onLogWorkSuccess)="onLogWorkSuccess($event)"
         ></app-habit>
       </div>
     </div>

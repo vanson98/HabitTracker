@@ -22,5 +22,6 @@ namespace HabitTracker.Habits.Dtos
         public HabitLogType HabitLogType { get; set; } = 0;
         public string Description { get; set; }
         public int? CategoryId { get; set; }
+        public bool IsLogDaily { get; set; }
     }
 }
