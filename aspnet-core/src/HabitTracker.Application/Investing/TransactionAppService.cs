@@ -68,14 +68,26 @@ namespace HabitTracker.Investing
                                            where ivm.Id == transaction.InvestmentId
                                            select c).FirstOrDefaultAsync();
             var investment = await _investmentRepository.FirstOrDefaultAsync(transaction.InvestmentId);
+            // Đơn giá giao dịch
+            var amount = (transaction.NumberOfShares * transaction.Price);
+            //  Phí GD
+            var fee = transaction.TransactionType == TransactionType.BUY ? investmentChannel.BuyFee : investmentChannel.SellFee;
+            transaction.TotalFee = amount * fee / 100;
 
             // Cập nhật thông tin investment
             if (investment != null && transaction.TransactionType == TransactionType.BUY)
             {
-                investment.TotalAmountBuy += transaction.NumberOfShares;
-                investment.TotalMoneyBuy += (transaction.NumberOfShares * transaction.Price);
-                investment.Vol += transaction.NumberOfShares;
-                investment.CapitalCost = (decimal)(investment.TotalMoneyBuy / investment.TotalAmountBuy);
+                if((transaction.TotalFee + amount) < investmentChannel.MoneyStock)
+                {
+                    investment.TotalAmountBuy += transaction.NumberOfShares;
+                    investment.TotalMoneyBuy += (transaction.NumberOfShares * transaction.Price);
+                    investment.Vol += transaction.NumberOfShares;
+                    investment.CapitalCost = (decimal)(investment.TotalMoneyBuy / investment.TotalAmountBuy);
+                }
+                else
+                {
+                    throw new UserFriendlyException("Không đủ tiền mặt để mua!");
+                }
             }
             else if (investment != null && transaction.TransactionType == TransactionType.SELL)
             {
@@ -101,16 +113,18 @@ namespace HabitTracker.Investing
             }
             await _investmentRepository.UpdateAsync(investment);
 
-            // Cập nhật phí 
-            var fee = transaction.TransactionType == TransactionType.BUY ? investmentChannel.BuyFee : investmentChannel.SellFee;
-            transaction.TotalFee = (transaction.NumberOfShares * transaction.Price) * fee / 100;
+           
+           
             if (transaction.TransactionType == TransactionType.BUY)
             {
                 investmentChannel.TotalBuyFee += transaction.TotalFee;
+                investmentChannel.MoneyStock -= (amount + transaction.TotalFee);
             }
             else
             {
                 investmentChannel.TotalSellFee += transaction.TotalFee;
+                investmentChannel.MoneyStock += amount;
+                investmentChannel.MoneyStock -= transaction.TotalFee;
             }
 
             await _investmentChannelRepository.UpdateAsync(investmentChannel);

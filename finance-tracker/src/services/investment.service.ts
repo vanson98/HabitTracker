@@ -14,7 +14,7 @@ const investmentService = {
     channelId: number,
   ): Promise<DataResponseDto<InvestmentSelectDto[]>> {
     const res = await ajax.get(
-      "/api/services/app/investment/GetAllForSelect?channelId" + channelId,
+      "/api/services/app/investment/GetAllForSelect?channelId=" + channelId,
     );
     return res.data;
   },

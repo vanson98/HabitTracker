@@ -1,5 +1,8 @@
 <template>
   <div>
+    <div>
+      <el-button @click="createInvestment">Create Investment</el-button>
+    </div>
     <div class="table-ctn">
       <el-table
         :data="listInvestment"
@@ -23,9 +26,9 @@
         ></el-table-column>
         <el-table-column prop="totalMoneyBuy" label="Money Bought">
           <template #default="scope">
-            <span>
-              {{ util.formatCurrency(scope.row.totalMoneyBuy * 1000) }}
-            </span>
+            <span>{{
+              util.formatCurrency(scope.row.totalMoneyBuy * 1000)
+            }}</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -39,8 +42,7 @@
           label="Vol"
           width="100"
           :class-name="'mid-col-highlight'"
-        >
-        </el-table-column>
+        ></el-table-column>
         <el-table-column
           prop="marketPrice"
           label="Market Price"
@@ -53,9 +55,9 @@
         ></el-table-column>
         <el-table-column prop="totalMoneySell" label="Money Sold">
           <template #default="scope">
-            <span>
-              {{ util.formatCurrency(scope.row.totalMoneySell * 1000) }}
-            </span>
+            <span>{{
+              util.formatCurrency(scope.row.totalMoneySell * 1000)
+            }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="Status" width="80">
@@ -115,32 +117,50 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import {
+  onMounted,
+  ref,
+  defineProps,
+  withDefaults,
+  onUpdated,
+  watch,
+} from "vue";
 import COEInvestmentDialog from "./COEInvestmentDialog.vue";
 import { ElButton } from "element-plus";
 import InvestmentDto from "@/models/investment/InvestmentDtos";
 import financeService from "@/services/investment.service";
 import { InvestmentStatus } from "@/models/investment/InvestmentDtos";
 import util from "@/lib/util";
+
+//props
+const props = withDefaults(defineProps<{ isReload: boolean }>(), {
+  isReload: false,
+});
+// data
 const pageSize = 10;
 let currentPage = ref(1);
 let totalCount = ref(0);
-
 let isOpenDialog = ref(false);
 let editInvestmentId = ref<number | null>(null);
-
 let listInvestment = ref<InvestmentDto[]>();
-// event
+
+// life circle event
 onMounted(() => {
   getAllInvestment();
 });
 
+onUpdated(() => {
+  if (props.isReload) {
+    getAllInvestment();
+  }
+});
+
+//method
 const pageChange = (page: number) => {
   currentPage.value = page;
   getAllInvestment();
 };
 
-//method
 const getAllInvestment = () => {
   financeService
     .getAllPaginInvestment((currentPage.value - 1) * pageSize, pageSize)

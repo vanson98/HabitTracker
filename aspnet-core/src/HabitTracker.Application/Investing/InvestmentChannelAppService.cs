@@ -1,6 +1,7 @@
 ﻿using Abp.Application.Services;
 using Abp.Domain.Repositories;
 using Abp.ObjectMapping;
+using Abp.UI;
 using HabitTracker.Investing.Dtos.InvestmentChannelDtos;
 using HabitTracker.Investing.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -80,6 +81,24 @@ namespace HabitTracker.Investing
             {
                 return null;
             }
+        }
+
+        public async Task<InvestmentChannelDto> UpdateFee(int channelId,string type, float value)
+        {
+            var investmentChannel = await _repository.FirstOrDefaultAsync(channelId);
+            if(investmentChannel!= null)
+            {
+                // SF - sell fee
+                if (type == "SF")
+                {
+                    investmentChannel.SellFee = value;
+                }else if (type == "BF")
+                {
+                    investmentChannel.BuyFee = value;
+                }
+                return MapToEntityDto(await _repository.UpdateAsync(investmentChannel));
+            }
+            throw new UserFriendlyException("Không tìm thấy channel");
         }
     }
 }

@@ -7,6 +7,7 @@ import ajax from "@/lib/ajax";
 import BaseResponseDto from "@/models/http/BaseReponseDto";
 import DataResponseDto from "@/models/http/DataResponseDto";
 import Transaction from "@/models/transaction/TransactionModels";
+import { AxiosResponse } from "axios";
 
 const transactionService = {
   async searchPaging(

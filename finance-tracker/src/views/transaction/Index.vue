@@ -1,5 +1,10 @@
 <template>
   <div>
+    <div>
+      <el-button @click="createTransaction" class="float-right" type="primary"
+        >Add Transaction</el-button
+      >
+    </div>
     <!-- start table content -->
     <div class="table-ctn">
       <el-table
@@ -90,11 +95,19 @@
       :isOpen="isOpenCOETransactionDialog"
       :editTransactionId="editTransactionId"
       @close="onCloseCOETransactionDialog"
+      :channelId="props.channelId"
     ></COETransactionDialog>
   </div>
 </template>
 <script lang="ts" setup>
-import { onBeforeMount, ref, defineProps } from "vue";
+import {
+  onBeforeMount,
+  ref,
+  defineProps,
+  onMounted,
+  onUpdated,
+  defineEmits,
+} from "vue";
 import COETransactionDialog from "./COETransactionDialog.vue";
 import { ElButton, ElMessage, ElMessageBox } from "element-plus";
 import TransactionDto, {
@@ -112,7 +125,10 @@ let props = defineProps<{
   investmentIdSelected: number | undefined;
   transactionType: number;
   timeRangeSelected: string | Array<any>;
+  channelId: number;
 }>();
+// emit
+const emits = defineEmits(["reloadData"]);
 // page data
 const pageSize = 10;
 let transactionType = TransactionType;
@@ -133,8 +149,6 @@ onBeforeMount(() => {
   init();
 });
 
-// Get all investment channel info
-
 // Page change
 const pageChange = (page: number) => {
   currentPage.value = page;
@@ -149,7 +163,11 @@ const getAllTransaction = () => {
     transactionType: props.transactionType,
     investmentId: props.investmentIdSelected,
   };
-  if (props.timeRangeSelected != "" && props.timeRangeSelected.length == 2) {
+  if (
+    props.timeRangeSelected != null &&
+    Array.isArray(props.timeRangeSelected) &&
+    props.timeRangeSelected.length == 2
+  ) {
     searchingInfo["fromTransactionDate"] = moment(
       props.timeRangeSelected[0],
     ).toISOString();
@@ -219,6 +237,7 @@ const onCloseCOETransactionDialog = (isSuccess: boolean) => {
   isOpenCOETransactionDialog.value = false;
   if (isSuccess) {
     getAllTransaction();
+    emits("reloadData");
   }
 };
 </script>

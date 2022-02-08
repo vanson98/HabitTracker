@@ -67,10 +67,6 @@ import {
   defineEmits,
   withDefaults,
   onUpdated,
-  onMounted,
-  onActivated,
-  onDeactivated,
-  watch,
   onBeforeMount,
 } from "vue";
 //data
@@ -123,7 +119,6 @@ onUpdated(() => {
 // Method
 function getInvestmentById(id: number) {
   financeService.getInvestemntById(id).then((res) => {
-    debugger;
     investmentData.value = res.result;
   });
 }

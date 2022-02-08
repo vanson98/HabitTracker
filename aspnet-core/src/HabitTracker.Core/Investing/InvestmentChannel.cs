@@ -29,7 +29,7 @@ namespace HabitTracker.Investing
         /// </summary>
         public float MoneyOutput { get; set; }
         /// <summary>
-        /// Tiền mặt thực có
+        /// Tiền mặt thực có 
         /// </summary>
         public float MoneyStock { get; set; }
 

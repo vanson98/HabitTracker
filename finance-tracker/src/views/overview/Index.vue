@@ -22,39 +22,84 @@
         style="width: 200px"
         size="small"
       ></el-input>
-      <el-button type="primary" size="small">Add Money</el-button>
-      <el-button type="primary" size="small">Withdraw Money</el-button>
-      <el-button type="primary" size="small">Update Buy Fee</el-button>
-      <el-button type="primary" size="small">Update Sell Fee</el-button>
+      <el-button type="primary" size="small" @click="addMoneyInput"
+        >Add Money</el-button
+      >
+      <el-button type="primary" size="small" @click="withdrawMoney"
+        >Withdraw Money</el-button
+      >
+      <el-button type="primary" size="small" @click="updateFee('BF')"
+        >Update Buy Fee</el-button
+      >
+      <el-button type="primary" size="small" @click="updateFee('SF')"
+        >Update Sell Fee</el-button
+      >
     </div>
     <!-- end control container -->
 
     <!-- start info container -->
-    <div>
+    <div v-if="channelInfoData != null">
       <table class="w-full">
         <tr>
           <td>Tổng tiền nhập vào</td>
-          <td class="float-left">12</td>
-          <td>Tiền mặt thực có</td>
-          <td>10</td>
-          <td>Tổng tiền rút ra</td>
-          <td>13</td>
+          <td class="float-right">
+            {{ util.formatCurrency(channelInfoData.moneyInput * 1000) }}
+          </td>
+          <td style="padding-left: 20px">Tiền mặt thực có</td>
+          <td class="float-right">
+            {{ util.formatCurrency(channelInfoData.moneyStock * 1000) }}
+          </td>
+          <td style="padding-left: 20px">Tổng tiền rút ra</td>
+          <td class="float-right">
+            {{ util.formatCurrency(channelInfoData.moneyOutput * 1000) }}
+          </td>
         </tr>
         <tr>
           <td>Tông giá giá trị CP (lúc mua)</td>
-          <td class="float-left">12</td>
-          <td>Tống giá trị thị trường (hiện tại)</td>
-          <td>10</td>
-          <td>Lãi/lỗ</td>
-          <td>13</td>
+          <td class="float-right">
+            {{ util.formatCurrency(channelInfoData.valueOfStocks * 1000) }}
+          </td>
+          <td style="padding-left: 20px">Tống giá trị thị trường (hiện tại)</td>
+          <td class="float-right">
+            {{
+              util.formatCurrency(channelInfoData.marketValueOfStocks * 1000)
+            }}
+          </td>
+          <td style="padding-left: 20px">Lãi/lỗ</td>
+          <td style="padding-left: 20px" class="float-right">
+            {{
+              util.formatCurrency(
+                (channelInfoData.marketValueOfStocks -
+                  channelInfoData.valueOfStocks) *
+                  1000,
+              )
+            }}
+            <span v-if="channelInfoData.valueOfStocks > 0">
+              - ({{
+                (
+                  ((channelInfoData.marketValueOfStocks -
+                    channelInfoData.valueOfStocks) *
+                    100) /
+                  channelInfoData.valueOfStocks
+                ).toFixed(2)
+              }}%)
+            </span>
+          </td>
         </tr>
         <tr>
           <td>Tài sản ròng (NAV)</td>
-          <td>13</td>
-          <td>Tổng phí mua / bán</td>
-          <td>10</td>
-          <td>Phí bán / mua</td>
-          <td>13</td>
+          <td class="float-right">
+            {{ util.formatCurrency(channelInfoData.nav * 1000) }}
+          </td>
+          <td style="padding-left: 20px">Tổng phí mua / bán</td>
+          <td class="float-right">
+            {{ util.formatCurrency(channelInfoData.totalBuyFee * 1000) }} |
+            {{ util.formatCurrency(channelInfoData.totalSellFee * 1000) }}
+          </td>
+          <td style="padding-left: 20px">Phí mua / bán</td>
+          <td class="float-right">
+            {{ channelInfoData.buyFee }}% | {{ channelInfoData.sellFee }}%
+          </td>
         </tr>
       </table>
     </div>
@@ -104,30 +149,32 @@
         ></el-date-picker>
       </div>
       <div class="mt-auto flex-grow">
-        <el-button @click="createInvestment">Create Investment</el-button>
         <el-button @click="resetSearching" type="primary">Reset</el-button>
-        <el-button @click="createTransaction" class="float-right" type="primary"
-          >Add Transaction</el-button
-        >
       </div>
     </div>
     <!-- end search form -->
 
     <!--manage investment-->
-    <ManageInvestment></ManageInvestment>
+    <ManageInvestment :isReload="reloadListInvestment"></ManageInvestment>
 
     <!--TransactionComponent-->
     <TransactionComponent
       :investmentIdSelected="searchingInfo.investmentId"
       :transactionType="searchingInfo.transactionType"
       :timeRangeSelected="timeRangeSelect"
+      :channelId="channelInfoData.id"
+      @reloadData="reloadData"
     ></TransactionComponent>
   </div>
 </template>
 <script lang="ts" setup>
 import TransactionComponent from "../transaction/Index.vue";
+import ManageInvestment from "../investment/ManageInvestment.vue";
 import investmentChannelService from "@/services/investment-channel.service";
-import { ChannelSellectDto } from "@/models/investment-channel/InvestmentChannelModels";
+import {
+  ChannelSellectDto,
+  InvestmentChannelOverviewDto,
+} from "@/models/investment-channel/InvestmentChannelModels";
 import { onBeforeMount, ref } from "vue";
 import {
   SearchTransactionInputDto,
@@ -139,9 +186,25 @@ import util from "@/lib/util";
 
 // channel data
 let listChannel = ref<ChannelSellectDto[]>();
-let channelIdSelected = ref();
+let channelIdSelected = ref<number>(0);
+let updateAmountInfo = ref(0);
+let channelInfoData = ref<InvestmentChannelOverviewDto>({
+  id: 0,
+  buyFee: 0,
+  changnelName: "",
+  channelCode: "",
+  marketValueOfStocks: 0,
+  moneyInput: 0,
+  moneyOutput: 0,
+  moneyStock: 0,
+  nav: 0,
+  sellFee: 0,
+  totalBuyFee: 0,
+  totalSellFee: 0,
+  valueOfStocks: 0,
+});
 
-// search investment data
+// investment data
 let listSelectInvestment = ref<InvestmentSelectDto[]>();
 let transactionType = TransactionType;
 let transactionTypeEnumKey = util.getEnumKeys(transactionType);
@@ -179,17 +242,15 @@ const defaultTimeRange = [
     },
   },
 ];
-let timeRangeSelect = ref("");
-
-// channel data
-let updateAmountInfo = ref(0);
+let timeRangeSelect = ref<string | Array<any>>("");
+let reloadListInvestment = ref<boolean>(false);
 
 const init = () => {
   investmentChannelService.getAllChannel().then((res) => {
     listChannel.value = res.result;
     if (listChannel.value.length > 0) {
       channelIdSelected.value = listChannel.value[0].id;
-      getAllInvestmentChannelInfo();
+      getChannelInfo();
       getAllInvestmentForSelect();
     }
   });
@@ -200,18 +261,22 @@ onBeforeMount(() => {
   init();
 });
 
-// Methods
-const getAllInvestmentChannelInfo = () => {
-  investmentChannelService.getAllChannel().then((res) => {
-    listChannel.value = res.result;
-  });
+// Get Channel Info
+const getChannelInfo = () => {
+  investmentChannelService
+    .getChannelOverview(channelIdSelected.value)
+    .then((res) => {
+      channelInfoData.value = res.result;
+    });
 };
 
 // Get all investment for select
 const getAllInvestmentForSelect = () => {
-  investmentService.getAllForSelect(channelIdSelected.value).then((res) => {
-    listSelectInvestment.value = res.result;
-  });
+  if (channelIdSelected.value != null) {
+    investmentService.getAllForSelect(channelIdSelected.value).then((res) => {
+      listSelectInvestment.value = res.result;
+    });
+  }
 };
 
 // reset searching transaction info
@@ -222,5 +287,49 @@ const resetSearching = () => {
     transactionType: -1,
   };
   timeRangeSelect.value = "";
+};
+
+const addMoneyInput = () => {
+  if (channelInfoData.value != null && channelInfoData.value.channelCode) {
+    investmentChannelService
+      .addMoneyInput(channelInfoData.value?.channelCode, updateAmountInfo.value)
+      .then((res) => {
+        channelInfoData.value.moneyInput = res.result.moneyInput;
+        channelInfoData.value.moneyStock = res.result.moneyStock;
+      });
+    updateAmountInfo.value = 0;
+  }
+};
+
+const withdrawMoney = () => {
+  if (channelInfoData.value != null && channelInfoData.value.channelCode) {
+    investmentChannelService
+      .withdrawMoney(channelInfoData.value?.channelCode, updateAmountInfo.value)
+      .then((res) => {
+        channelInfoData.value.moneyOutput = res.result.moneyOutput;
+        channelInfoData.value.moneyStock = res.result.moneyStock;
+      });
+    updateAmountInfo.value = 0;
+  }
+};
+
+const updateFee = (type: string) => {
+  if (channelInfoData.value != null) {
+    investmentChannelService
+      .updateFee(channelInfoData.value.id, type, updateAmountInfo.value)
+      .then((res) => {
+        if (type == "BF") {
+          channelInfoData.value.buyFee = res.result.buyFee;
+        } else {
+          channelInfoData.value.sellFee = res.result.sellFee;
+        }
+      });
+    updateAmountInfo.value = 0;
+  }
+};
+
+const reloadData = () => {
+  getChannelInfo();
+  reloadListInvestment.value = true;
 };
 </script>

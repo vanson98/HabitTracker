@@ -98,9 +98,10 @@ import {
   defineEmits,
   withDefaults,
   onUpdated,
+  onMounted,
   onBeforeMount,
 } from "vue";
-import financeService from "@/services/investment.service";
+import investmentService from "@/services/investment.service";
 
 // Data
 let listInvestment = ref<InvestmentSelectDto[]>();
@@ -114,10 +115,15 @@ let transaction = ref<TransactionDto>({
 
 // Prop
 const props = withDefaults(
-  defineProps<{ isOpen: boolean; editTransactionId: number | null }>(),
+  defineProps<{
+    isOpen: boolean;
+    editTransactionId: number | null;
+    channelId: number;
+  }>(),
   {
     isOpen: false,
     editTransactionId: null,
+    channelId: 0,
   },
 );
 
@@ -125,10 +131,12 @@ const props = withDefaults(
 const emits = defineEmits(["close"]);
 
 // Hook
-onBeforeMount(() => {
-  financeService.getAllForSelect().then((res) => {
-    listInvestment.value = res.result;
-  });
+onUpdated(() => {
+  if (props.channelId > 0) {
+    investmentService.getAllForSelect(props.channelId).then((res) => {
+      listInvestment.value = res.result;
+    });
+  }
 });
 
 onUpdated(() => {
@@ -148,6 +156,7 @@ onUpdated(() => {
 // Method
 async function save() {
   if (props.editTransactionId) {
+    // Cập nhật
     transactionService.update(transaction.value).then((res) => {
       if (res.success) {
         ElNotification({
@@ -159,13 +168,14 @@ async function save() {
       } else {
         ElNotification({
           title: "Error",
-          message: result.error.message,
+          message: res.error.message,
           type: "error",
         });
         closeModel(false);
       }
     });
   } else {
+    // Thêm mới
     var result = await transactionService.create(transaction.value);
     if (!result.success) {
       ElNotification({

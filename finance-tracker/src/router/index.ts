@@ -19,7 +19,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "overview",
         name: "overview",
-        component: () => import("../views/investment/ManageInvestment.vue"),
+        component: () => import("../views/overview/Index.vue"),
       },
       {
         path: "investment",
@@ -49,7 +49,7 @@ router.beforeEach((to, from, next) => {
   } else if (to.name == "login" && util.sessionData.userId != null) {
     // TH user đã đăng nhập
     next({
-      name: "transactions",
+      name: "overview",
     });
   } else {
     // check quyền...

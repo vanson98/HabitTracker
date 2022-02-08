@@ -16,12 +16,62 @@ const investmentChannelService = {
   },
   getChannelOverview: async function (
     id: number,
-  ): Promise<InvestmentChannelOverviewDto> {
+  ): Promise<DataResponseDto<InvestmentChannelOverviewDto>> {
     const res = await ajax.get(
       "/api/services/app/InvestmentChannel/GetChannelOverview",
       {
         params: {
           id: id,
+        },
+      },
+    );
+    return res.data;
+  },
+  addMoneyInput: async function (
+    channelCode: string,
+    income: number,
+  ): Promise<DataResponseDto<InvestmentChannelDto>> {
+    const res = await ajax.post(
+      "/api/services/app/InvestmentChannel/AddMoneyInput",
+      null,
+      {
+        params: {
+          channelCode: channelCode,
+          income: income,
+        },
+      },
+    );
+    return res.data;
+  },
+  withdrawMoney: async function (
+    channelCode: string,
+    value: number,
+  ): Promise<DataResponseDto<InvestmentChannelDto>> {
+    const res = await ajax.post(
+      "/api/services/app/InvestmentChannel/WithdrawMoney",
+      null,
+      {
+        params: {
+          channelCode: channelCode,
+          value: value,
+        },
+      },
+    );
+    return res.data;
+  },
+  updateFee: async function (
+    channelId: number,
+    type: string,
+    value: number,
+  ): Promise<DataResponseDto<InvestmentChannelDto>> {
+    const res = await ajax.put(
+      "/api/services/app/InvestmentChannel/UpdateFee",
+      null,
+      {
+        params: {
+          channelId: channelId,
+          type: type,
+          value: value,
         },
       },
     );
