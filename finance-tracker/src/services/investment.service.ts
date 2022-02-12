@@ -5,28 +5,42 @@ import InvestmentDto, {
   InvestmentOverviewDto,
   CreateOrUpdateInvestmentDto,
   InvestmentSelectDto,
+  InvestmentStatus,
 } from "@/models/investment/InvestmentDtos";
+import qs from "qs";
 import ajax from "../lib/ajax";
 
 const investmentService = {
   // get all for select
   async getAllForSelect(
     channelId: number,
+    keyword: string | undefined,
   ): Promise<DataResponseDto<InvestmentSelectDto[]>> {
     const res = await ajax.get(
-      "/api/services/app/investment/GetAllForSelect?channelId=" + channelId,
+      "/api/services/app/investment/GetAllForSelect?channelId=" +
+        channelId +
+        "&keyword=" +
+        keyword,
     );
     return res.data;
   },
   // Get all paging
-  async getAllPaginInvestment(
+  async getAllOverview(
     skipCount: number,
     resultCount: number,
-  ): Promise<PageResponseDto<InvestmentDto>> {
-    const response = await ajax.get("/api/services/app/Investment/GetAll", {
+    ids: number[],
+    status: InvestmentStatus | null,
+  ): Promise<PageResponseDto<InvestmentOverviewDto>> {
+    var url = "/api/services/app/Investment/GetAllOverview";
+    const response = await ajax.get(url, {
       params: {
         skipCount: skipCount,
-        maxResultCount: resultCount,
+        resultCount: resultCount,
+        ids: ids,
+        status: status,
+      },
+      paramsSerializer: function (params) {
+        return qs.stringify(params, { arrayFormat: "repeat" });
       },
     });
     return response.data;

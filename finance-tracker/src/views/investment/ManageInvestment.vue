@@ -44,15 +44,28 @@
           :class-name="'mid-col-highlight'"
         ></el-table-column>
         <el-table-column
-          prop="marketPrice"
           label="Market Price"
           width="120"
           :class-name="'mid-col-highlight'"
-        ></el-table-column>
-        <el-table-column
-          prop="totalAmountSell"
-          label="Amount Sell"
-        ></el-table-column>
+        >
+          <template #default="scope">
+            <span>{{ scope.row.marketPrice }} </span>
+            <span
+              v-if="scope.row.capitalCost > 0"
+              :class="{
+                interest: scope.row.currentInterest > 0,
+                loss: scope.row.currentInterest < 0,
+              }"
+            >
+              ({{
+                (
+                  ((scope.row.marketPrice - scope.row.capitalCost) * 100) /
+                  scope.row.capitalCost
+                ).toFixed(2)
+              }}%)</span
+            >
+          </template>
+        </el-table-column>
         <el-table-column prop="totalMoneySell" label="Money Sold">
           <template #default="scope">
             <span>{{
@@ -60,6 +73,10 @@
             }}</span>
           </template>
         </el-table-column>
+        <el-table-column
+          prop="totalAmountSell"
+          label="Amount Sell"
+        ></el-table-column>
         <el-table-column prop="status" label="Status" width="80">
           <template #default="scope">
             <el-tag
@@ -127,22 +144,32 @@ import {
 } from "vue";
 import COEInvestmentDialog from "./COEInvestmentDialog.vue";
 import { ElButton } from "element-plus";
-import InvestmentDto from "@/models/investment/InvestmentDtos";
+import InvestmentDto, {
+  InvestmentOverviewDto,
+} from "@/models/investment/InvestmentDtos";
 import financeService from "@/services/investment.service";
 import { InvestmentStatus } from "@/models/investment/InvestmentDtos";
 import util from "@/lib/util";
 
 //props
-const props = withDefaults(defineProps<{ isReload: boolean }>(), {
-  isReload: false,
-});
+const props = withDefaults(
+  defineProps<{
+    isReload: boolean;
+    investmentIds: number[];
+    investmentStatus: number;
+  }>(),
+  {
+    isReload: false,
+    investmentStatus: -1,
+  },
+);
 // data
 const pageSize = 10;
 let currentPage = ref(1);
 let totalCount = ref(0);
 let isOpenDialog = ref(false);
 let editInvestmentId = ref<number | null>(null);
-let listInvestment = ref<InvestmentDto[]>();
+let listInvestment = ref<InvestmentOverviewDto[]>();
 
 // life circle event
 onMounted(() => {
@@ -155,6 +182,13 @@ onUpdated(() => {
   }
 });
 
+watch(
+  () => [props.investmentIds, props.investmentStatus],
+  (newValue, oldValue) => {
+    getAllInvestment();
+  },
+);
+
 //method
 const pageChange = (page: number) => {
   currentPage.value = page;
@@ -163,7 +197,12 @@ const pageChange = (page: number) => {
 
 const getAllInvestment = () => {
   financeService
-    .getAllPaginInvestment((currentPage.value - 1) * pageSize, pageSize)
+    .getAllOverview(
+      (currentPage.value - 1) * pageSize,
+      pageSize,
+      props.investmentIds,
+      props.investmentStatus,
+    )
     .then((res) => {
       listInvestment.value = res.result.items;
       totalCount.value = res.result.totalCount;
@@ -196,6 +235,14 @@ const closeDialog = (isSuccess: boolean) => {
 </script>
 <style>
 .mid-col-highlight {
-  background-color: #53d99e !important;
+  background-color: #e0e0e0bf !important;
+}
+.loss {
+  color: red;
+  font-weight: 600;
+}
+.interest {
+  color: #01c801;
+  font-weight: 600;
 }
 </style>

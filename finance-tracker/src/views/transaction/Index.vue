@@ -57,18 +57,13 @@
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="Thời gian tạo">
+        <el-table-column label="Tổng phí">
           <template #default="scope">
-            <span>{{
-              moment(scope.row.creationTime).format("DD/MM/yyyy")
-            }}</span>
+            <span>{{ util.formatCurrency(scope.row.totalFee * 1000) }}</span>
           </template>
         </el-table-column>
         <el-table-column label="Action" :align="'center'" width="180">
           <template #default="scope">
-            <el-button size="small" @click="editTransaction(scope.row.id)"
-              >Edit</el-button
-            >
             <el-button
               size="small"
               type="danger"
@@ -93,9 +88,7 @@
     <!-- dialogs -->
     <COETransactionDialog
       :isOpen="isOpenCOETransactionDialog"
-      :editTransactionId="editTransactionId"
       @close="onCloseCOETransactionDialog"
-      :channelId="props.channelId"
     ></COETransactionDialog>
   </div>
 </template>
@@ -107,6 +100,7 @@ import {
   onMounted,
   onUpdated,
   defineEmits,
+  watch,
 } from "vue";
 import COETransactionDialog from "./COETransactionDialog.vue";
 import { ElButton, ElMessage, ElMessageBox } from "element-plus";
@@ -122,10 +116,9 @@ import moment from "moment";
 
 // props
 let props = defineProps<{
-  investmentIdSelected: number | undefined;
+  investmentIds: number[];
   transactionType: number;
   timeRangeSelected: string | Array<any>;
-  channelId: number;
 }>();
 // emit
 const emits = defineEmits(["reloadData"]);
@@ -138,7 +131,6 @@ let listTransaction = ref<SearchTransactionOutputDto[]>();
 // dialog data
 let isOpenCOETransactionDialog = ref(false);
 let isOpenAddOrWithdrawMoneyDialog = ref(false);
-let editTransactionId = ref<number | null>(null);
 
 const init = () => {
   getAllTransaction();
@@ -148,6 +140,13 @@ const init = () => {
 onBeforeMount(() => {
   init();
 });
+// watcher
+watch(
+  () => [props.investmentIds, props.timeRangeSelected, props.transactionType],
+  (newValue, oldValue) => {
+    getAllTransaction();
+  },
+);
 
 // Page change
 const pageChange = (page: number) => {
@@ -161,7 +160,7 @@ const getAllTransaction = () => {
     skipCount: (currentPage.value - 1) * pageSize,
     maxResultCount: pageSize,
     transactionType: props.transactionType,
-    investmentId: props.investmentIdSelected,
+    investmentIds: props.investmentIds,
   };
   if (
     props.timeRangeSelected != null &&
@@ -189,13 +188,6 @@ const getAllTransaction = () => {
 // Tạo mới transaction
 const createTransaction = () => {
   isOpenCOETransactionDialog.value = true;
-  editTransactionId.value = null;
-};
-
-// Sửa transaction
-const editTransaction = (id: number) => {
-  isOpenCOETransactionDialog.value = true;
-  editTransactionId.value = id;
 };
 
 // Xóa transaction

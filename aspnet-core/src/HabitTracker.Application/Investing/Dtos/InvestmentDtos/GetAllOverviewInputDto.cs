@@ -10,7 +10,7 @@ namespace HabitTracker.Investing.Dtos.InvestmentDtos
 {
     public class GetAllOverviewInputDto : PagedResultRequestDto
     {
-        public string StockCode { get; set; }
-        public InvestmentStatus Status { get; set; }
+        public int[] Ids { get; set; }
+        public int Status { get; set; }
     }
 }

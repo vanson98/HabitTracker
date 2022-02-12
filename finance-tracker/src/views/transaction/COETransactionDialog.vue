@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     :model-value="isOpen"
-    :title="editTransactionId ? 'Cập nhật giao dịch' : 'Tạo mới giao dịch'"
+    :title="'Tạo mới giao dịch'"
     width="30%"
     @close="closeModel(false)"
   >
@@ -12,6 +12,11 @@
           v-model="transaction.investmentId"
           class="w-full my-2"
           placeholder="Chọn mã cổ phiếu"
+          filterable
+          remote
+          reserve-keyword
+          :remote-method="remoteMethod"
+          :loading="getListInvestmentLoading"
         >
           <el-option
             v-for="item in listInvestment"
@@ -55,7 +60,7 @@
         ></el-input>
       </div>
       <div class="flex">
-        <div class="w-2/3">
+        <div>
           <div>Thời gian giao dịch</div>
           <el-date-picker
             v-model="transaction.transactionTime"
@@ -64,16 +69,10 @@
             placeholder="Chọn ngày"
           ></el-date-picker>
         </div>
-        <div class="w-1/3">
-          <p>Thành tiền</p>
-          {{
-            transaction.numberOfShares && transaction.price
-              ? util.formatCurrency(
-                  transaction.numberOfShares * transaction.price * 1000,
-                )
-              : ""
-          }}
-        </div>
+      </div>
+      <div>
+        <p>Thành tiền: {{ totalAmount }}</p>
+        <p>Tổng phí: {{ totalFee }}</p>
       </div>
     </div>
     <template #footer>
@@ -98,10 +97,15 @@ import {
   defineEmits,
   withDefaults,
   onUpdated,
-  onMounted,
-  onBeforeMount,
+  computed,
 } from "vue";
 import investmentService from "@/services/investment.service";
+import { appStore } from "@/store/appStore";
+import { storeToRefs } from "pinia";
+
+// Store
+var store = appStore();
+const { channel } = storeToRefs(store);
 
 // Data
 let listInvestment = ref<InvestmentSelectDto[]>();
@@ -111,40 +115,57 @@ let transaction = ref<TransactionDto>({
   transactionTime: new Date(),
   transactionType: transactionType.BUY,
   totalFee: 0,
+  numberOfShares: 0,
+  price: 0,
 });
+let getListInvestmentLoading = ref<boolean>(false);
 
 // Prop
 const props = withDefaults(
   defineProps<{
     isOpen: boolean;
-    editTransactionId: number | null;
-    channelId: number;
   }>(),
   {
     isOpen: false,
-    editTransactionId: null,
-    channelId: 0,
   },
 );
+
+//Computed property
+const totalAmount = computed((): string => {
+  var result =
+    transaction.value.numberOfShares && transaction.value.price
+      ? util.formatCurrency(
+          transaction.value.numberOfShares * transaction.value.price * 1000,
+        )
+      : "";
+  return result;
+});
+
+const totalFee = computed((): string => {
+  if (transaction.value.numberOfShares && transaction.value.price) {
+    var feePortion =
+      transaction.value.transactionType == transactionType.BUY
+        ? channel.value.buyFee
+        : channel.value.sellFee;
+    return util.formatCurrency(
+      (feePortion *
+        (transaction.value.numberOfShares * transaction.value.price * 1000)) /
+        100,
+    );
+  } else {
+    return "";
+  }
+});
 
 // Event
 const emits = defineEmits(["close"]);
 
 // Hook
 onUpdated(() => {
-  if (props.channelId > 0) {
-    investmentService.getAllForSelect(props.channelId).then((res) => {
-      listInvestment.value = res.result;
-    });
-  }
-});
+  // if (channel.value.id > 0 && props.isOpen && props.editTransactionId) {
 
-onUpdated(() => {
-  if (props.editTransactionId && props.isOpen) {
-    transactionService.getById(props.editTransactionId).then((res) => {
-      transaction.value = res.result;
-    });
-  } else if (!props.editTransactionId && props.isOpen) {
+  // }
+  if (props.isOpen) {
     transaction.value = {
       transactionTime: new Date(),
       transactionType: transactionType.BUY,
@@ -155,46 +176,46 @@ onUpdated(() => {
 
 // Method
 async function save() {
-  if (props.editTransactionId) {
-    // Cập nhật
-    transactionService.update(transaction.value).then((res) => {
-      if (res.success) {
-        ElNotification({
-          title: "Success",
-          message: "Cập nhật thành công",
-          type: "success",
-        });
-        closeModel(true);
-      } else {
-        ElNotification({
-          title: "Error",
-          message: res.error.message,
-          type: "error",
-        });
-        closeModel(false);
-      }
+  // Thêm mới
+  var result = await transactionService.create(transaction.value);
+  if (!result.success) {
+    ElNotification({
+      title: "Error",
+      message: result.error.message,
+      type: "error",
     });
-  } else {
-    // Thêm mới
-    var result = await transactionService.create(transaction.value);
-    if (!result.success) {
-      ElNotification({
-        title: "Error",
-        message: result.error.message,
-        type: "error",
-      });
 
-      closeModel(false);
-    } else {
-      ElNotification({
-        title: "Success",
-        message: "Thêm mới thành công",
-        type: "success",
-      });
-      closeModel(true);
-    }
+    closeModel(false);
+  } else {
+    ElNotification({
+      title: "Success",
+      message: "Thêm mới thành công",
+      type: "success",
+    });
+    closeModel(true);
   }
 }
+
+const remoteMethod = (query: string) => {
+  if (query) {
+    getListInvestmentLoading.value = true;
+    setTimeout(() => {
+      getListInvestmentLoading.value = false;
+      getAllInvestmentForSelect(query);
+    }, 200);
+  } else {
+    listInvestment.value = [];
+  }
+};
+
+// Get all investment for select
+const getAllInvestmentForSelect = (query: string | undefined) => {
+  if (channel.value.id != null) {
+    investmentService.getAllForSelect(channel.value.id, query).then((res) => {
+      listInvestment.value = res.result;
+    });
+  }
+};
 
 // close model
 function closeModel(isSuccess: boolean) {

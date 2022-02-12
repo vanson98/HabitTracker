@@ -51,14 +51,18 @@ namespace HabitTracker.Investing
         public async Task<InvestmentChannelDto> WithdrawMoney(string channelCode, float value)
         {
             var channel = await _repository.FirstOrDefaultAsync(ivt => ivt.ChannelCode == channelCode);
+
             if(channel!= null)
             {
+                if(channel.MoneyStock < value)
+                {
+                    throw new UserFriendlyException("Không đủ tiền để rút!");
+                }
                 channel.MoneyOutput += value;
                 channel.MoneyStock -= value;
-                // Phí rút
                 return MapToEntityDto(await _repository.UpdateAsync(channel));
             }
-            return null;
+            throw new UserFriendlyException("Không tìm thấy channel");
         }
 
         public async Task<InvestmentChannelOverviewDto> GetChannelOverview(int id)

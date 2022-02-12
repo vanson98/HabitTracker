@@ -69,6 +69,10 @@ import {
   onUpdated,
   onBeforeMount,
 } from "vue";
+import { storeToRefs } from "pinia";
+// store
+const store = appStore();
+const { channel } = storeToRefs(store);
 //data
 let investmentData = ref<CreateOrUpdateInvestmentDto>({});
 let listChannel = ref<ChannelSellectDto[]>();
@@ -109,10 +113,10 @@ const emits = defineEmits(["close"]);
 // Hook
 onUpdated(() => {
   if (props.editInvestmentId && props.isOpen) {
-    debugger;
     getInvestmentById(props.editInvestmentId);
   } else if (!props.editInvestmentId && props.isOpen) {
     investmentData.value = {};
+    investmentData.value.channelId = channel.value.id;
   }
 });
 

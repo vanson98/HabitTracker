@@ -29,7 +29,7 @@ export interface CreateOrUpdateInvestmentDto {
 }
 
 export interface GetAllOverviewInputDto {
-  stockCode?: string;
+  ids?: string;
   status: InvestmentStatus;
 }
 

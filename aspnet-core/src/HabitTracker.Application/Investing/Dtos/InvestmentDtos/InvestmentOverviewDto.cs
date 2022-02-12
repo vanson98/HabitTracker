@@ -9,6 +9,7 @@ namespace HabitTracker.Investing.Dtos.InvestmentDtos
 {
     public class InvestmentOverviewDto
     {
+        public int Id { get; set; }
         public string StockCode { get; set; }
 
         /// <summary>

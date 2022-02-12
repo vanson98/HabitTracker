@@ -37,7 +37,7 @@ namespace HabitTracker.Investing
         {
             var listTransactionDto = from ivm in _investmentRepository.GetAll()
                                      join t in _repository.GetAll() on ivm.Id equals t.InvestmentId
-                                     where input.InvestmentId == null || ivm.Id == input.InvestmentId
+                                     where input.InvestmentIds == null || input.InvestmentIds.Any(id=>id==ivm.Id)
                                      where input.TransactionType == -1 || (int)t.TransactionType == input.TransactionType
                                      where input.FromTransactionDate == null || t.TransactionTime >= input.FromTransactionDate
                                      where input.ToTransactionDate == null || t.TransactionTime <= input.ToTransactionDate
@@ -51,7 +51,8 @@ namespace HabitTracker.Investing
                                          Price = t.Price,
                                          StockCode = ivm.StockCode,
                                          TransactionType = t.TransactionType,
-                                         LastModificationTime = t.LastModificationTime
+                                         LastModificationTime = t.LastModificationTime,
+                                         TotalFee = t.TotalFee
                                      };
             var result = new PagedResultDto<SearchTransactionOutputDto>()
             {
@@ -136,13 +137,8 @@ namespace HabitTracker.Investing
         public async override Task DeleteAsync(EntityDto<int> input)
         {
             var transaction = await _repository.FirstOrDefaultAsync(input.Id);
-
-            var investmentChannel = await (from ivm in _investmentRepository.GetAll()
-                                           join c in _investmentChannelRepository.GetAll() on ivm.ChannelId equals c.Id
-                                           where ivm.Id == transaction.Id
-                                           select c).FirstOrDefaultAsync();
-
             var investment = await _investmentRepository.FirstOrDefaultAsync(transaction.InvestmentId);
+            var investmentChannel = await _investmentChannelRepository.FirstOrDefaultAsync(investment.ChannelId);
 
             // Cập nhật thông tin investment
             if (investment != null && transaction.TransactionType == TransactionType.BUY)
@@ -156,7 +152,10 @@ namespace HabitTracker.Investing
             {
                 investment.TotalAmountSell -= transaction.NumberOfShares;
                 investment.TotalMoneySell -= (transaction.NumberOfShares * transaction.Price);
+                investment.TotalAmountBuy += transaction.NumberOfShares;
+                investment.TotalMoneyBuy += transaction.NumberOfShares * transaction.Price;
                 investment.Vol += transaction.NumberOfShares;
+                investment.CapitalCost = (decimal)(investment.TotalMoneyBuy / investment.TotalAmountBuy);
             }
 
             if (investment.TotalAmountBuy == investment.TotalAmountSell)

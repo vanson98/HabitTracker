@@ -29,11 +29,17 @@ namespace HabitTracker.Investing
             _investmentChannelRepository = investmentChannelRepository;
         }
 
-        public List<InvestmentSelectDto> GetAllForSelect(int channelId)
+        public List<InvestmentSelectDto> GetAllForSelect(int channelId,string keyword)
         {
+            var searchKeyWord = keyword!=null? keyword.ToLower() : "";
             return _repository
                 .GetAll()
-                .Where(ivm => ivm.ChannelId == channelId)
+                .Where(ivm => ivm.ChannelId == channelId && 
+                (
+                   ivm.StockCode.ToLower().Contains(searchKeyWord) 
+                || ivm.CompanyName.ToLower().Contains(searchKeyWord)
+                || ivm.Id.ToString().Contains(searchKeyWord)
+                ))
                 .OrderByDescending(ivm => ivm.Id).Select((ivm) => new InvestmentSelectDto()
                 {
                     Id = ivm.Id,
@@ -45,11 +51,12 @@ namespace HabitTracker.Investing
         public async Task<PagedResultDto<InvestmentOverviewDto>> GetAllOverview(GetAllOverviewInputDto input)
         {
             var listInvestment = from ivm in _repository.GetAll()
-                                 where (input.StockCode == null || ivm.StockCode.ToLower().Contains(input.StockCode.ToLower()))
-                                       && ivm.Status == input.Status
+                                 where (input.Ids == null || input.Ids.Any(id=>id==ivm.Id))
+                                       && (input.Status == -1 || (int)ivm.Status == input.Status)
                                  orderby ivm.StockCode
                                  select new InvestmentOverviewDto()
                                  {
+                                     Id = ivm.Id,
                                      StockCode = ivm.StockCode,
                                      Status = ivm.Status,
                                      CapitalCost = ivm.CapitalCost,
@@ -59,8 +66,8 @@ namespace HabitTracker.Investing
                                      TotalMoneyBuy = ivm.TotalMoneyBuy,
                                      TotalMoneySell = ivm.TotalMoneySell,
                                      Vol = ivm.Vol,
-                                     CurrentInterest = ivm.Vol > 0 ?
-                                        ((float)(ivm.Vol * ivm.MarketPrice) - (float)(ivm.Vol * ivm.CapitalCost)) / (ivm.Vol * ivm.MarketPrice) : 0,
+                                     CurrentInterest = ivm.CapitalCost > 0 ?
+                                        ((ivm.MarketPrice - (float)ivm.CapitalCost) / ivm.MarketPrice) : 0,
                                      SellInterest = ivm.TotalAmountSell == 0 ? 0 : (ivm.TotalMoneySell - ivm.TotalMoneyBuy) / ivm.TotalMoneyBuy
                                  };
 

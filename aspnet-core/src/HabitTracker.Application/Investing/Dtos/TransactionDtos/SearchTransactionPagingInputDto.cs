@@ -10,7 +10,7 @@ namespace HabitTracker.Investing.Dtos.InvestmentDtos
 {
     public class SearchTransactionPagingInputDto : PagedResultRequestDto
     {
-        public int? InvestmentId { get; set; }
+        public int[] InvestmentIds { get; set; }
         public DateTime? FromTransactionDate { get; set; }
         public DateTime? ToTransactionDate { get; set; }
         public int TransactionType { get; set; }

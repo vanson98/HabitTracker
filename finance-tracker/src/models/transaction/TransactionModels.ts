@@ -13,7 +13,7 @@ export default interface TransactionDto {
 }
 
 export interface SearchTransactionInputDto {
-  investmentId?: number;
+  investmentIds: number[];
   fromTransactionDate?: string;
   toTransactionDate?: string;
   transactionType: number;

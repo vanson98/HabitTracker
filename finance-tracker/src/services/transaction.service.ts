@@ -8,6 +8,7 @@ import BaseResponseDto from "@/models/http/BaseReponseDto";
 import DataResponseDto from "@/models/http/DataResponseDto";
 import Transaction from "@/models/transaction/TransactionModels";
 import { AxiosResponse } from "axios";
+import qs from "qs";
 
 const transactionService = {
   async searchPaging(
@@ -15,6 +16,9 @@ const transactionService = {
   ): Promise<PageResponseDto<SearchTransactionOutputDto>> {
     var res = await ajax.get("/api/services/app/transaction/searchPaging", {
       params: input,
+      paramsSerializer: function (params) {
+        return qs.stringify(params, { arrayFormat: "repeat" });
+      },
     });
     return res.data;
   },
@@ -29,13 +33,6 @@ const transactionService = {
   async create(transaction: Transaction): Promise<BaseResponseDto> {
     var res = await ajax.post(
       "/api/services/app/transaction/create",
-      transaction,
-    );
-    return res.data;
-  },
-  async update(transaction: Transaction): Promise<BaseResponseDto> {
-    var res = await ajax.put(
-      "/api/services/app/transaction/update",
       transaction,
     );
     return res.data;
