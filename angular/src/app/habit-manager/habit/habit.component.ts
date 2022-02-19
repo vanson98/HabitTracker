@@ -311,6 +311,7 @@ export class HabitComponent implements OnInit {
     logWorkDialog.content.onSave.subscribe((timeLog) => {
       this.getAllHabitLogDataByYear();
       this.getAllHabitLogInDuration();
+      this.habitDto.practiceTime+= timeLog;
       this.onLogWorkSuccess.emit(timeLog)
     });
   }

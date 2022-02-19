@@ -84,7 +84,7 @@
     <div class="container-fluid">
       <div class="p-3">
         <app-habit
-          *ngFor="let habit of habits; trackBy: trackerHabitList"
+          *ngFor="let habit of tempHabits; trackBy: trackerHabitList"
           [habit-dto]="habit"
           (onEditHabitBtnClick)="editHabit($event)"
           (onLogWorkSuccess)="onLogWorkSuccess($event)"

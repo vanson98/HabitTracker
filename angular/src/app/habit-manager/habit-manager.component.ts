@@ -19,6 +19,7 @@ export class HabitManagerComponent implements OnInit {
   categorySelected: HabitCategoryDto = null;
   
   habits : HabitDto[];
+  tempHabits: HabitDto[];
   listHabitCategory: HabitCategoryDto[];
   categoryPracticePercent: number = 0;
 
@@ -41,13 +42,23 @@ export class HabitManagerComponent implements OnInit {
     });
   }
 
-  // @HostListener('window:scroll', ['$event'])
-  // onScroll(event) {
-  //   var bodyEl = document.getElementsByTagName('body')[0];
-  //   if (bodyEl.offsetHeight + bodyEl.scrollTop >= bodyEl.scrollHeight) {
-  //     console.log("hahah");
-  //   }
-  // }
+  @HostListener('window:scroll', ['$event'])
+  onScroll(event) {
+    var bodyEl = document.getElementsByTagName('body')[0];
+    var bodyOffsetHeight = bodyEl.offsetHeight;
+    var windowInnerHeight = window.innerHeight;
+    var windowScrollHeight = window.scrollY;
+    if (windowInnerHeight + windowScrollHeight>=bodyOffsetHeight ) {
+      if(this.habits.length>2){
+        this.tempHabits =  this.tempHabits.concat(_.take(this.habits,2));
+        this.habits = _.drop(this.habits,2);
+      }else if(this.habits.length > 0){
+        this.tempHabits =  this.tempHabits.concat(_.take(this.habits,1));
+        this.habits = _.drop(this.habits,1);
+      }
+     
+    }
+  }
 
   getAllHabits() {
     this._habitService.getAllNoPaging(this.searchKeyWord,this.categoryIdSelected).subscribe((res)=>{
@@ -56,6 +67,8 @@ export class HabitManagerComponent implements OnInit {
         this.categorySelected['totalPracticeTime'] = _.sumBy(this.habits,(h)=>h.practiceTime); 
         this.categoryPracticePercent = Number((this.categorySelected['totalPracticeTime'] * 100/ this.categorySelected.goalTime).toFixed(4));
       }
+      this.tempHabits = _.take(this.habits,2);
+      this.habits = _.drop(this.habits,2);
     });
   }
 
@@ -114,9 +127,10 @@ export class HabitManagerComponent implements OnInit {
   updateHabitItem(id,mode) : void{
     this._habitService.get(id).subscribe(
       (res) => {
+        debugger
         if(mode=='update'){
-          var index = _.findIndex(this.habits,{id:id});
-          this.habits.splice(index,1,res);
+          var index = _.findIndex(this.tempHabits,{id:id});
+          this.tempHabits.splice(index,1,res);
         }else{
           this.habits.push(res);
         }
@@ -135,6 +149,7 @@ export class HabitManagerComponent implements OnInit {
   onLogWorkSuccess(timeLog){
     this.categorySelected['totalPracticeTime'] += timeLog;
     this.categoryPracticePercent = Number((this.categorySelected['totalPracticeTime'] * 100/ this.categorySelected.goalTime).toFixed(4));
+
   }
 
 
