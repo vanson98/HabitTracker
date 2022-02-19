@@ -139,26 +139,30 @@ namespace HabitTracker.Investing
             var transaction = await _repository.FirstOrDefaultAsync(input.Id);
             var investment = await _investmentRepository.FirstOrDefaultAsync(transaction.InvestmentId);
             var investmentChannel = await _investmentChannelRepository.FirstOrDefaultAsync(investment.ChannelId);
-
+            var amount = transaction.NumberOfShares * transaction.Price;
             // Cập nhật thông tin investment
             if (investment != null && transaction.TransactionType == TransactionType.BUY)
             {
                 investment.TotalAmountBuy -= transaction.NumberOfShares;
-                investment.TotalMoneyBuy -= (transaction.NumberOfShares * transaction.Price);
+                investment.TotalMoneyBuy -= amount;
                 investment.Vol -= transaction.NumberOfShares;
-                investment.CapitalCost = (decimal)(investment.TotalMoneyBuy / investment.TotalAmountBuy);
+                investment.CapitalCost = investment.TotalAmountBuy == 0 ? 0 : (decimal)(investment.TotalMoneyBuy / investment.TotalAmountBuy);
             }
             else if (investment != null && transaction.TransactionType == TransactionType.SELL)
             {
                 investment.TotalAmountSell -= transaction.NumberOfShares;
-                investment.TotalMoneySell -= (transaction.NumberOfShares * transaction.Price);
+                investment.TotalMoneySell -= amount;
                 investment.TotalAmountBuy += transaction.NumberOfShares;
-                investment.TotalMoneyBuy += transaction.NumberOfShares * transaction.Price;
+                investment.TotalMoneyBuy += amount;
                 investment.Vol += transaction.NumberOfShares;
                 investment.CapitalCost = (decimal)(investment.TotalMoneyBuy / investment.TotalAmountBuy);
             }
-
-            if (investment.TotalAmountBuy == investment.TotalAmountSell)
+            // Cập nhật trạng thái
+            if (investment.TotalAmountBuy == 0)
+            {
+                investment.Status = InvestmentStatus.NotActive;
+            }
+            else if (investment.TotalAmountBuy == investment.TotalAmountSell)
             {
                 investment.Status = InvestmentStatus.BuyOut;
             }
@@ -168,15 +172,19 @@ namespace HabitTracker.Investing
             }
             await _investmentRepository.UpdateAsync(investment);
 
-            // Cập nhật lại phí
-            if (transaction.TransactionType == Enum.TransactionType.BUY)
+            // Cập nhật lại channel info
+            if (transaction.TransactionType == TransactionType.BUY)
             {
                 investmentChannel.TotalBuyFee -= transaction.TotalFee;
+                investmentChannel.MoneyStock += (amount + transaction.TotalFee);
             }
             else
             {
                 investmentChannel.TotalSellFee -= transaction.TotalFee;
+                investmentChannel.MoneyStock -= amount;
+                investmentChannel.MoneyStock += transaction.TotalFee;
             }
+
             await _investmentChannelRepository.UpdateAsync(investmentChannel);
             await base.DeleteAsync(input);
         }

@@ -28,12 +28,14 @@ const investmentService = {
   async getAllOverview(
     skipCount: number,
     resultCount: number,
+    channelId: number,
     ids: number[],
     status: InvestmentStatus | null,
   ): Promise<PageResponseDto<InvestmentOverviewDto>> {
     var url = "/api/services/app/Investment/GetAllOverview";
     const response = await ajax.get(url, {
       params: {
+        channelId: channelId,
         skipCount: skipCount,
         resultCount: resultCount,
         ids: ids,
@@ -66,6 +68,12 @@ const investmentService = {
     input: CreateOrUpdateInvestmentDto,
   ): Promise<BaseResponseDto> {
     const res = await ajax.put("/api/services/app/investment/update", input);
+    return res.data;
+  },
+  async delete(id: number): Promise<BaseResponseDto> {
+    const res = await ajax.delete(
+      "/api/services/app/Investment/Delete?Id=" + id,
+    );
     return res.data;
   },
 };

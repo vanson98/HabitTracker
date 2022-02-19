@@ -86,111 +86,59 @@
     <!-- end table content -->
 
     <!-- dialogs -->
-    <COETransactionDialog
-      :isOpen="isOpenCOETransactionDialog"
-      @close="onCloseCOETransactionDialog"
-    ></COETransactionDialog>
+    <CreateTransactionDialog
+      :isOpen="isOpenCreateTransactionDialog"
+      @close="onCloseCreateTransactionDialog"
+    ></CreateTransactionDialog>
   </div>
 </template>
 <script lang="ts" setup>
-import {
-  onBeforeMount,
-  ref,
-  defineProps,
-  onMounted,
-  onUpdated,
-  defineEmits,
-  watch,
-} from "vue";
-import COETransactionDialog from "./COETransactionDialog.vue";
+import { ref, defineProps, defineEmits, withDefaults } from "vue";
+import CreateTransactionDialog from "./CreateTransactionDialog.vue";
 import { ElButton, ElMessage, ElMessageBox } from "element-plus";
-import TransactionDto, {
-  SearchTransactionInputDto,
-  TransactionType,
-} from "@/models/transaction/TransactionModels";
+import { TransactionType } from "@/models/transaction/TransactionModels";
 
 import transactionService from "@/services/transaction.service";
 import { SearchTransactionOutputDto } from "@/models/transaction/TransactionModels";
 import util from "@/lib/util";
 import moment from "moment";
 
-// props
-let props = defineProps<{
-  investmentIds: number[];
-  transactionType: number;
-  timeRangeSelected: string | Array<any>;
-}>();
-// emit
-const emits = defineEmits(["reloadData"]);
-// page data
-const pageSize = 10;
-let transactionType = TransactionType;
-let currentPage = ref(1);
-let totalCount = ref(0);
-let listTransaction = ref<SearchTransactionOutputDto[]>();
-// dialog data
-let isOpenCOETransactionDialog = ref(false);
-let isOpenAddOrWithdrawMoneyDialog = ref(false);
-
-const init = () => {
-  getAllTransaction();
-};
-
-// Event
-onBeforeMount(() => {
-  init();
-});
-// watcher
-watch(
-  () => [props.investmentIds, props.timeRangeSelected, props.transactionType],
-  (newValue, oldValue) => {
-    getAllTransaction();
-  },
+// ============== Props ================
+const props = withDefaults(
+  defineProps<{
+    totalCount: number;
+    pageSize: number;
+    listTransaction: SearchTransactionOutputDto[];
+  }>(),
+  {},
 );
 
-// Page change
+// ============== Data ================
+// enum
+let transactionType = TransactionType;
+
+// emit
+const emits = defineEmits([
+  "onListTransactionUpdated",
+  "onTransactionPageChange",
+]);
+
+// page data
+let currentPage = ref(1);
+
+// dialog data
+let isOpenCreateTransactionDialog = ref(false);
+
+// =========== Method ===========
 const pageChange = (page: number) => {
   currentPage.value = page;
-  getAllTransaction();
+  emits("onTransactionPageChange", page);
 };
 
-// Get All Transaction
-const getAllTransaction = () => {
-  var searchingInfo: SearchTransactionInputDto = {
-    skipCount: (currentPage.value - 1) * pageSize,
-    maxResultCount: pageSize,
-    transactionType: props.transactionType,
-    investmentIds: props.investmentIds,
-  };
-  if (
-    props.timeRangeSelected != null &&
-    Array.isArray(props.timeRangeSelected) &&
-    props.timeRangeSelected.length == 2
-  ) {
-    searchingInfo["fromTransactionDate"] = moment(
-      props.timeRangeSelected[0],
-    ).toISOString();
-    searchingInfo["toTransactionDate"] = moment(
-      props.timeRangeSelected[1],
-    ).toISOString();
-  }
-  transactionService
-    .searchPaging(searchingInfo)
-    .then((res) => {
-      listTransaction.value = res.result.items;
-      totalCount.value = res.result.totalCount;
-    })
-    .catch(() => {
-      alert("Đã có lỗi xảy ra");
-    });
-};
-
-// Tạo mới transaction
 const createTransaction = () => {
-  isOpenCOETransactionDialog.value = true;
+  isOpenCreateTransactionDialog.value = true;
 };
 
-// Xóa transaction
 const deleteTransaction = (id: number) => {
   ElMessageBox.confirm(
     "Thao tác này sẽ xóa vĩnh viễn giao dịch. Bạn có muốn tiếp tục?",
@@ -204,7 +152,7 @@ const deleteTransaction = (id: number) => {
     .then(() => {
       transactionService.delete(id).then((res) => {
         if (res.success) {
-          getAllTransaction();
+          emits("onListTransactionUpdated");
           ElMessage({
             type: "success",
             message: "Delete completed",
@@ -225,11 +173,10 @@ const deleteTransaction = (id: number) => {
     });
 };
 
-const onCloseCOETransactionDialog = (isSuccess: boolean) => {
-  isOpenCOETransactionDialog.value = false;
+const onCloseCreateTransactionDialog = (isSuccess: boolean) => {
+  isOpenCreateTransactionDialog.value = false;
   if (isSuccess) {
-    getAllTransaction();
-    emits("reloadData");
+    emits("onListTransactionUpdated");
   }
 };
 </script>

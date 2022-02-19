@@ -1,6 +1,7 @@
 ﻿using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
+using Abp.UI;
 using HabitTracker.Investing.Dtos.InvestmentDtos;
 using HabitTracker.Investing.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -51,8 +52,9 @@ namespace HabitTracker.Investing
         public async Task<PagedResultDto<InvestmentOverviewDto>> GetAllOverview(GetAllOverviewInputDto input)
         {
             var listInvestment = from ivm in _repository.GetAll()
-                                 where (input.Ids == null || input.Ids.Any(id=>id==ivm.Id))
-                                       && (input.Status == -1 || (int)ivm.Status == input.Status)
+                                 where ivm.ChannelId == input.ChannelId 
+                                        && (input.Ids == null || input.Ids.Any(id=>id==ivm.Id))
+                                        && (input.Status == -1 || (int)ivm.Status == input.Status)
                                  orderby ivm.StockCode
                                  select new InvestmentOverviewDto()
                                  {
@@ -79,5 +81,14 @@ namespace HabitTracker.Investing
             return result;
         }
 
+        public override Task DeleteAsync(EntityDto<int> input)
+        {
+            var totalTransaction = _transactionRepository.GetAll().Where(t => t.InvestmentId == input.Id).Count();
+            if(totalTransaction > 0)
+            {
+                throw new UserFriendlyException("Danh mục này đã có giao dịch. Không thể xóa!");
+            }
+            return base.DeleteAsync(input);
+        }
     }
 }

@@ -12,5 +12,6 @@ namespace HabitTracker.Investing.Dtos.InvestmentDtos
     {
         public int[] Ids { get; set; }
         public int Status { get; set; }
+        public int ChannelId { get; set; }
     }
 }

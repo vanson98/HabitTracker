@@ -17,7 +17,7 @@ ajax.get("/AbpUserConfiguration/GetAll").then((res) => {
     render() {
       return h(App);
     },
-    async onMounted() {
+    async mounted() {
       const sessionStore = appStore();
       const res = await authService.getUserInfo();
       const userInfo = res.data.result.user;

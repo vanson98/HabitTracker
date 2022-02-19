@@ -30,6 +30,7 @@ namespace HabitTracker.Investing
         /// <summary>
         /// Giá trung bình mỗi CP
         /// </summary>
+        [Column(TypeName = "decimal(18,5)")]
         public decimal CapitalCost { get; set; }
 
         /// <summary>

@@ -95,18 +95,6 @@ onBeforeMount(() => {
   });
 });
 
-// watcher
-// watch(
-//   () => props.editInvestmentId,
-//   (newValue, oldValue) => {
-//     if (newValue) {
-//       getInvestmentById(newValue);
-//     } else {
-//       investmentData.value = {};
-//     }
-//   },
-// );
-
 // Event
 const emits = defineEmits(["close"]);
 
@@ -126,6 +114,7 @@ function getInvestmentById(id: number) {
     investmentData.value = res.result;
   });
 }
+
 async function save() {
   if (props.editInvestmentId) {
     financeService.editInvestment(investmentData.value).then((res) => {

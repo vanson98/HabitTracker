@@ -4,7 +4,7 @@
     <div class="flex flex-row space-x-4">
       <el-select
         placeholder="Chọn kênh đầu tư"
-        @change="getAllInvestmentForSelect"
+        @change="onChannelChange"
         v-model="channelIdSelected"
         size="small"
       >
@@ -127,6 +127,7 @@
           reserve-keyword
           :remote-method="remoteMethod"
           :loading="getListInvestmentLoading"
+          @change="getAllInvestmentOverview(1)"
         >
           <el-option
             v-for="item in listSelectInvestment"
@@ -141,6 +142,7 @@
         <el-select
           v-model="s_transactionType"
           placeholder="Chọn loại giao dịch"
+          @change="getAllTransaction(1)"
         >
           <el-option :label="'ALL'" :value="-1"></el-option>
           <el-option
@@ -156,6 +158,7 @@
         <el-select
           v-model="s_investmentStatus"
           placeholder="Trạn thái investment"
+          @change="getAllInvestmentOverview(1)"
         >
           <el-option :label="'ALL'" :value="-1"></el-option>
           <el-option
@@ -176,6 +179,7 @@
           start-placeholder="Start date"
           end-placeholder="End date"
           :shortcuts="defaultTimeRange"
+          @change="getAllTransaction(1)"
         ></el-date-picker>
       </div>
       <div class="mt-auto flex-grow">
@@ -186,18 +190,20 @@
 
     <!--manage investment-->
     <ManageInvestment
-      :isReload="reloadListInvestment"
-      :investmentIds="s_investmentIds"
-      :investmentStatus="s_investmentStatus"
+      :totalCount="mi_totalCount"
+      :listInvestment="mi_listInvestment"
+      :pageSize="mi_pageSize"
+      @onInvestmentPageChange="onInvestmentPageChange"
+      @on-list-investment-change="init()"
     ></ManageInvestment>
 
     <!--TransactionComponent-->
     <TransactionComponent
-      :investmentIds="s_investmentIds"
-      :transactionType="s_transactionType"
-      :timeRangeSelected="s_timeRangeSelect"
-      :channelId="channel.id"
-      @reloadData="reloadData"
+      :list-transaction="mt_listTransaction"
+      :page-size="mt_pageSize"
+      :total-count="mt_totalCount"
+      @on-list-transaction-updated="init()"
+      @on-transaction-page-change="onTransactionPageChange"
     ></TransactionComponent>
   </div>
 </template>
@@ -209,12 +215,14 @@ import {
   ChannelSellectDto,
   InvestmentChannelOverviewDto,
 } from "@/models/investment-channel/InvestmentChannelModels";
-import { onBeforeMount, onUpdated, ref } from "vue";
+import { onBeforeMount, onMounted, onUpdated, ref } from "vue";
 import {
   SearchTransactionInputDto,
+  SearchTransactionOutputDto,
   TransactionType,
 } from "@/models/transaction/TransactionModels";
 import {
+  InvestmentOverviewDto,
   InvestmentSelectDto,
   InvestmentStatus,
 } from "@/models/investment/InvestmentDtos";
@@ -223,14 +231,19 @@ import util from "@/lib/util";
 import { appStore } from "@/store/appStore";
 import { storeToRefs } from "pinia";
 import { ElMessage, ElMessageBox } from "element-plus";
+import transactionService from "@/services/transaction.service";
+import moment from "moment";
+// =============== Data =====================
 // enum
 let investmentStatusEnum = InvestmentStatus;
 let transactionTypeEnum = TransactionType;
 let transactionTypeEnumKey = util.getEnumKeys(transactionTypeEnum);
 let investmentStatusEnumKey = util.getEnumKeys(investmentStatusEnum);
+
 // store
 const store = appStore();
 const { channel } = storeToRefs(store);
+
 // channel data
 let listChannel = ref<ChannelSellectDto[]>();
 let channelIdSelected = ref<number>(0);
@@ -240,11 +253,9 @@ let updateAmountInfo = ref();
 let s_investmentIds = ref<number[]>([]);
 let s_timeRangeSelect = ref<string | Array<any>>("");
 let s_transactionType = ref<number>(-1);
-let s_investmentStatus = ref<number>(-1);
-
+let s_investmentStatus = ref<number>(investmentStatusEnum.Active);
 let listSelectInvestment = ref<InvestmentSelectDto[]>();
 let getListInvestmentLoading = ref<boolean>(false);
-
 const defaultTimeRange = [
   {
     text: "Last week",
@@ -275,63 +286,47 @@ const defaultTimeRange = [
   },
 ];
 
-let reloadListInvestment = ref<boolean>(false);
+// investment data
+let mi_listInvestment = ref<InvestmentOverviewDto[]>([]);
+let mi_pageSize = 10;
+let mi_totalCount = ref(0);
 
-// Method
-const init = () => {
+// transaction data
+let mt_listTransaction = ref<SearchTransactionOutputDto[]>([]);
+let mt_totalCount = ref(0);
+const mt_pageSize = 10;
+
+// ==================== Hook ====================
+onMounted(() => {
   investmentChannelService.getAllChannel().then((res) => {
     listChannel.value = res.result;
     if (listChannel.value.length > 0) {
       channelIdSelected.value = listChannel.value[0].id;
-      getChannelInfo();
-      //getAllInvestmentForSelect();
+      init();
     }
   });
-};
-
-// Hook
-onBeforeMount(() => {
-  init();
 });
 
-// Get Channel Info
+// ================== Method ====================
+// init
+const init = () => {
+  getAllInvestmentOverview(1);
+  getAllTransaction(1);
+  getChannelInfo();
+};
+
+// *********** channel method ***********
+
+const onChannelChange = () => {
+  init();
+};
+
 const getChannelInfo = () => {
   investmentChannelService
     .getChannelOverview(channelIdSelected.value)
     .then((res) => {
       store.setChannelInfo(res.result);
     });
-};
-
-const remoteMethod = (query: string) => {
-  if (query) {
-    getListInvestmentLoading.value = true;
-    setTimeout(() => {
-      getListInvestmentLoading.value = false;
-      getAllInvestmentForSelect(query);
-    }, 200);
-  } else {
-    listSelectInvestment.value = [];
-  }
-};
-
-// Get all investment for select
-const getAllInvestmentForSelect = (query: string) => {
-  if (channelIdSelected.value != null) {
-    investmentService
-      .getAllForSelect(channelIdSelected.value, query)
-      .then((res) => {
-        listSelectInvestment.value = res.result;
-      });
-  }
-};
-
-// reset searching transaction info
-const resetSearching = () => {
-  s_investmentIds.value = [];
-  s_investmentStatus.value = -1;
-  s_transactionType.value = -1;
-  s_timeRangeSelect.value = "";
 };
 
 const updateChannel = (actionType: string) => {
@@ -420,8 +415,96 @@ const updateFee = (type: string) => {
   }
 };
 
-const reloadData = () => {
-  getChannelInfo();
-  reloadListInvestment.value = true;
+// ************ investment method ************
+
+const onInvestmentPageChange = (page: number) => {
+  getAllInvestmentOverview(page);
+};
+
+const getAllInvestmentOverview = (page: number) => {
+  investmentService
+    .getAllOverview(
+      (page - 1) * mi_pageSize,
+      mi_pageSize,
+      channelIdSelected.value,
+      s_investmentIds.value,
+      s_investmentStatus.value,
+    )
+    .then((res) => {
+      mi_listInvestment.value = res.result.items;
+      mi_totalCount.value = res.result.totalCount;
+    })
+    .catch(() => {
+      alert("Đã có lỗi xảy ra");
+    });
+};
+
+// ********** transaction method **********
+
+const onTransactionPageChange = (page: number) => {
+  getAllTransaction(page);
+};
+
+const getAllTransaction = (page: number) => {
+  var searchingInfo: SearchTransactionInputDto = {
+    skipCount: (page - 1) * mt_pageSize,
+    maxResultCount: mt_pageSize,
+    transactionType: s_transactionType.value,
+    investmentIds: s_investmentIds.value,
+  };
+  if (
+    s_timeRangeSelect.value != null &&
+    Array.isArray(s_timeRangeSelect.value) &&
+    s_timeRangeSelect.value.length == 2
+  ) {
+    searchingInfo["fromTransactionDate"] = moment(
+      s_timeRangeSelect.value[0],
+    ).toISOString();
+    searchingInfo["toTransactionDate"] = moment(
+      s_timeRangeSelect.value[1],
+    ).toISOString();
+  }
+  transactionService
+    .searchPaging(searchingInfo)
+    .then((res) => {
+      mt_listTransaction.value = res.result.items;
+      mt_totalCount.value = res.result.totalCount;
+    })
+    .catch(() => {
+      alert("Đã có lỗi xảy ra");
+    });
+};
+
+// ************ form search method ************
+
+const remoteMethod = (query: string) => {
+  if (query) {
+    getListInvestmentLoading.value = true;
+    setTimeout(() => {
+      getListInvestmentLoading.value = false;
+      getAllInvestmentForSelect(query);
+    }, 200);
+  } else {
+    listSelectInvestment.value = [];
+  }
+};
+
+const getAllInvestmentForSelect = (query: string) => {
+  if (channelIdSelected.value != null) {
+    investmentService
+      .getAllForSelect(channelIdSelected.value, query)
+      .then((res) => {
+        listSelectInvestment.value = res.result;
+      });
+  }
+};
+
+const resetSearching = () => {
+  s_investmentIds.value = [];
+  s_investmentStatus.value = -1;
+  s_transactionType.value = -1;
+  s_timeRangeSelect.value = "";
+  getAllInvestmentOverview(1);
+  getAllTransaction(1);
 };
 </script>

@@ -5,7 +5,7 @@
     </div>
     <div class="table-ctn">
       <el-table
-        :data="listInvestment"
+        :data="props.listInvestment"
         :border="true"
         style="width: 100%"
         height="550"
@@ -36,7 +36,11 @@
           label="Capital Cost"
           width="120"
           :class-name="'mid-col-highlight'"
-        ></el-table-column>
+        >
+          <template #default="scope">
+            {{ scope.row.capitalCost.toFixed(3) }}
+          </template>
+        </el-table-column>
         <el-table-column
           prop="vol"
           label="Vol"
@@ -110,7 +114,7 @@
             <el-button
               size="small"
               type="danger"
-              @click="deleteInvestment(scope.row)"
+              @click="deleteInvestment(scope.row.id)"
               >Delete</el-button
             >
           </template>
@@ -119,8 +123,8 @@
       <div class="text-center my-6">
         <el-pagination
           layout="prev, pager, next"
-          :total="totalCount"
-          :pageSize="pageSize"
+          :total="props.totalCount"
+          :pageSize="props.pageSize"
           :background="true"
           @current-change="pageChange($event)"
         ></el-pagination>
@@ -134,82 +138,37 @@
   </div>
 </template>
 <script lang="ts" setup>
-import {
-  onMounted,
-  ref,
-  defineProps,
-  withDefaults,
-  onUpdated,
-  watch,
-} from "vue";
+import { ref, defineProps, withDefaults, defineEmits } from "vue";
 import COEInvestmentDialog from "./COEInvestmentDialog.vue";
-import { ElButton } from "element-plus";
+import { ElButton, ElMessage, ElMessageBox } from "element-plus";
 import InvestmentDto, {
   InvestmentOverviewDto,
 } from "@/models/investment/InvestmentDtos";
 import financeService from "@/services/investment.service";
 import { InvestmentStatus } from "@/models/investment/InvestmentDtos";
 import util from "@/lib/util";
+import investmentService from "@/services/investment.service";
 
 //props
 const props = withDefaults(
   defineProps<{
-    isReload: boolean;
-    investmentIds: number[];
-    investmentStatus: number;
+    totalCount: number;
+    pageSize: number;
+    listInvestment: InvestmentOverviewDto[];
   }>(),
-  {
-    isReload: false,
-    investmentStatus: -1,
-  },
+  {},
 );
+// emit
+const emits = defineEmits(["onInvestmentPageChange", "onListInvestmentChange"]);
 // data
-const pageSize = 10;
 let currentPage = ref(1);
-let totalCount = ref(0);
 let isOpenDialog = ref(false);
 let editInvestmentId = ref<number | null>(null);
-let listInvestment = ref<InvestmentOverviewDto[]>();
-
-// life circle event
-onMounted(() => {
-  getAllInvestment();
-});
-
-onUpdated(() => {
-  if (props.isReload) {
-    getAllInvestment();
-  }
-});
-
-watch(
-  () => [props.investmentIds, props.investmentStatus],
-  (newValue, oldValue) => {
-    getAllInvestment();
-  },
-);
 
 //method
 const pageChange = (page: number) => {
   currentPage.value = page;
-  getAllInvestment();
-};
-
-const getAllInvestment = () => {
-  financeService
-    .getAllOverview(
-      (currentPage.value - 1) * pageSize,
-      pageSize,
-      props.investmentIds,
-      props.investmentStatus,
-    )
-    .then((res) => {
-      listInvestment.value = res.result.items;
-      totalCount.value = res.result.totalCount;
-    })
-    .catch(() => {
-      alert("Đã có lỗi xảy ra");
-    });
+  emits("onInvestmentPageChange", page);
 };
 
 const createInvestment = () => {
@@ -222,14 +181,46 @@ const editInvestment = (id: number) => {
   editInvestmentId.value = id;
 };
 
-const deleteInvestment = (row: any) => {
-  console.log("delete");
+const deleteInvestment = (id: number) => {
+  debugger;
+  ElMessageBox.confirm(
+    "Thao tác này sẽ xóa vĩnh viễn danh mục. Bạn có muốn tiếp tục?",
+    "Warning",
+    {
+      confirmButtonText: "OK",
+      cancelButtonText: "Cancel",
+      type: "warning",
+    },
+  )
+    .then(() => {
+      investmentService.delete(id).then((res) => {
+        if (res.success) {
+          debugger;
+          emits("onListInvestmentChange");
+          ElMessage({
+            type: "success",
+            message: "Delete completed",
+          });
+        } else {
+          ElMessage({
+            type: "info",
+            message: "Delete canceled",
+          });
+        }
+      });
+    })
+    .catch(() => {
+      ElMessage({
+        type: "info",
+        message: "Delete canceled",
+      });
+    });
 };
 
 const closeDialog = (isSuccess: boolean) => {
   isOpenDialog.value = false;
   if (isSuccess) {
-    getAllInvestment();
+    emits("onListInvestmentChange");
   }
 };
 </script>

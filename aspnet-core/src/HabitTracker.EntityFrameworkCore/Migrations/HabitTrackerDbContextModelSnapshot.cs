@@ -1657,7 +1657,7 @@ namespace HabitTracker.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<decimal>("CapitalCost")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,5)");
 
                     b.Property<int>("ChannelId")
                         .HasColumnType("int");
