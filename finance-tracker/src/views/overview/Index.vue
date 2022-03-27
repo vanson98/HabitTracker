@@ -57,32 +57,30 @@
         <tr>
           <td>Tổng tiền nhập vào</td>
           <td class="float-right">
-            {{ util.formatCurrency(channel.moneyInput * 1000) }}
+            {{ channel.moneyInput }}
           </td>
           <td style="padding-left: 20px">Tiền mặt thực có</td>
           <td class="float-right">
-            {{ util.formatCurrency(channel.moneyStock * 1000) }}
+            {{ channel.moneyStock }}
           </td>
           <td style="padding-left: 20px">Tổng tiền rút ra</td>
           <td class="float-right">
-            {{ util.formatCurrency(channel.moneyOutput * 1000) }}
+            {{ channel.moneyOutput }}
           </td>
         </tr>
         <tr>
           <td>Tông giá giá trị CP (lúc mua)</td>
           <td class="float-right">
-            {{ util.formatCurrency(channel.valueOfStocks * 1000) }}
+            {{ channel.valueOfStocks.toFixed(3) }}
           </td>
           <td style="padding-left: 20px">Tống giá trị thị trường (hiện tại)</td>
           <td class="float-right">
-            {{ util.formatCurrency(channel.marketValueOfStocks * 1000) }}
+            {{ channel.marketValueOfStocks.toFixed(3) }}
           </td>
           <td style="padding-left: 20px">Lãi/lỗ</td>
           <td style="padding-left: 20px" class="float-right">
             {{
-              util.formatCurrency(
-                (channel.marketValueOfStocks - channel.valueOfStocks) * 1000,
-              )
+              (channel.marketValueOfStocks - channel.valueOfStocks).toFixed(3)
             }}
             <span v-if="channel.valueOfStocks > 0">
               - ({{
@@ -90,7 +88,7 @@
                   ((channel.marketValueOfStocks - channel.valueOfStocks) *
                     100) /
                   channel.valueOfStocks
-                ).toFixed(2)
+                ).toFixed(3)
               }}%)
             </span>
           </td>
@@ -98,12 +96,12 @@
         <tr>
           <td>Tài sản ròng (NAV)</td>
           <td class="float-right">
-            {{ util.formatCurrency(channel.nav * 1000) }}
+            {{ channel.nav.toFixed(3) }}
           </td>
           <td style="padding-left: 20px">Tổng phí mua / bán</td>
           <td class="float-right">
-            {{ util.formatCurrency(channel.totalBuyFee * 1000) }} |
-            {{ util.formatCurrency(channel.totalSellFee * 1000) }}
+            {{ channel.totalBuyFee }} |
+            {{ channel.totalSellFee }}
           </td>
           <td style="padding-left: 20px">Phí mua / bán</td>
           <td class="float-right">
@@ -127,7 +125,7 @@
           reserve-keyword
           :remote-method="remoteMethod"
           :loading="getListInvestmentLoading"
-          @change="getAllInvestmentOverview(1)"
+          @change="onSelectStockCodeChange()"
         >
           <el-option
             v-for="item in listSelectInvestment"
@@ -325,6 +323,7 @@ const getChannelInfo = () => {
   investmentChannelService
     .getChannelOverview(channelIdSelected.value)
     .then((res) => {
+      console.log(res);
       store.setChannelInfo(res.result);
     });
 };
@@ -363,8 +362,10 @@ const addMoneyInput = () => {
     investmentChannelService
       .addMoneyInput(channel.value?.channelCode, updateAmountInfo.value)
       .then((res) => {
-        channel.value.moneyInput = res.result.moneyInput;
-        channel.value.moneyStock = res.result.moneyStock;
+        // channel.value.moneyInput = res.result.moneyInput;
+        // channel.value.moneyStock = res.result.moneyStock;
+        // channel.value.nav = channel.value.marketValueOfStocks
+        getChannelInfo();
         updateAmountInfo.value = null;
       })
       .catch(() => {
@@ -381,8 +382,7 @@ const withdrawMoney = () => {
     investmentChannelService
       .withdrawMoney(channel.value?.channelCode, updateAmountInfo.value)
       .then((res) => {
-        channel.value.moneyOutput = res.result.moneyOutput;
-        channel.value.moneyStock = res.result.moneyStock;
+        getChannelInfo();
         updateAmountInfo.value = null;
       })
       .catch(() => {
@@ -487,6 +487,11 @@ const remoteMethod = (query: string) => {
   } else {
     listSelectInvestment.value = [];
   }
+};
+
+const onSelectStockCodeChange = () => {
+  getAllInvestmentOverview(1);
+  getAllTransaction(1);
 };
 
 const getAllInvestmentForSelect = (query: string) => {

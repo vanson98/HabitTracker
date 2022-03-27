@@ -21,51 +21,51 @@ namespace HabitTracker.Investing.Dtos.InvestmentChannelDtos
         /// <summary>
         /// Tiền đã đem đi đầu tư
         /// </summary>
-        public float MoneyInput { get; set; }
+        public decimal MoneyInput { get; set; }
 
         /// <summary>
         /// Tiền đã rút ra
         /// </summary>
-        public float MoneyOutput { get; set; }
+        public decimal MoneyOutput { get; set; }
         /// <summary>
         /// Tiền mặt thực có
         /// </summary>
-        public float MoneyStock { get; set; }
+        public decimal MoneyStock { get; set; }
 
         /// <summary>
         /// Phí mua (%)
         /// </summary>
-        public float BuyFee { get; set; }
+        public decimal BuyFee { get; set; }
 
         /// <summary>
         /// Phí bán (%)
         /// </summary>
-        public float SellFee { get; set; }
+        public decimal SellFee { get; set; }
 
         /// <summary>
         /// Tổng phí mua
         /// </summary>
-        public float TotalBuyFee { get; set; }
+        public decimal TotalBuyFee { get; set; }
 
         /// <summary>
         /// Tổng phí bán
         /// </summary>
-        public float TotalSellFee { get; set; }
+        public decimal TotalSellFee { get; set; }
 
         /// <summary>
         /// tài sản ròng (Money + giá trị thị trường)
         /// </summary>
-        public float NAV { get; set; }
+        public decimal NAV { get; set; }
 
         /// <summary>
         /// Giá trị thị trường CK
         /// </summary>
-        public float MarketValueOfStocks { get; set; }
+        public decimal MarketValueOfStocks { get; set; }
 
         /// <summary>
         /// Tổng giá trị lúc mua
         /// </summary>
-        public float ValueOfStocks { get; set; }
+        public decimal ValueOfStocks { get; set; }
      
     }
 }

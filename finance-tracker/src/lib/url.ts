@@ -1,5 +1,5 @@
 const URL =
   process.env.NODE_ENV === "production"
-    ? "https://yourdomain/"
+    ? "http://localhost:8065/"
     : "https://localhost:44311/";
 export default URL;

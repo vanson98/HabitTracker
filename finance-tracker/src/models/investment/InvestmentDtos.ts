@@ -15,8 +15,10 @@ export default interface InvestmentDto {
 }
 
 export interface InvestmentOverviewDto extends InvestmentDto {
-  currentInterest: number;
+  gainLossPercent: number;
+  gainLossValue: number;
   sellInterest: number;
+  sellInterestPercent: number;
 }
 
 export interface CreateOrUpdateInvestmentDto {

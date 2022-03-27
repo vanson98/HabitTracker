@@ -15,12 +15,12 @@ namespace HabitTracker.Investing.Dtos.InvestmentDtos
         /// <summary>
         /// Tổng số lượng cổ mua
         /// </summary>
-        public long TotalAmountBuy { get; set; }
+        public ulong TotalAmountBuy { get; set; }
 
         /// <summary>
         /// Tổng số tiền mua
         /// </summary>
-        public float TotalMoneyBuy { get; set; }
+        public decimal TotalMoneyBuy { get; set; }
 
         /// <summary>
         /// Giá trung bình mỗi CP
@@ -30,22 +30,22 @@ namespace HabitTracker.Investing.Dtos.InvestmentDtos
         /// <summary>
         /// Giá cố phiếu hiện tại
         /// </summary>
-        public float MarketPrice { get; set; }
+        public decimal MarketPrice { get; set; }
 
         /// <summary>
         /// Tổng số lượng bán
         /// </summary>
-        public long TotalAmountSell { get; set; }
+        public ulong TotalAmountSell { get; set; }
 
         /// <summary>
         /// Tổng số tiền bán
         /// </summary>
-        public float TotalMoneySell { get; set; }
+        public decimal TotalMoneySell { get; set; }
 
         /// <summary>
         /// Khối lượng cổ phiếu hiện thời
         /// </summary>
-        public long Vol { get; set; }
+        public ulong Vol { get; set; }
 
         /// <summary>
         /// Trạng thái
@@ -55,12 +55,21 @@ namespace HabitTracker.Investing.Dtos.InvestmentDtos
         /// <summary>
         /// Tiền lãi của số cổ hiện tại
         /// </summary>
-        public float CurrentInterest { get; set; }
+        public decimal GainLossValue { get; set; }
         
+        /// <summary>
+        /// Lãi lỗ hiện tại (phần trăm)
+        /// </summary>
+        public decimal GainLossPercent { get; set; }
+
         /// <summary>
         /// Tiền lãi số CP đã bán
         /// </summary>
-        public float SellInterest { get; set; }
+        public decimal SellInterest { get; set; }
 
+        /// <summary>
+        /// Tỉ lệ lãi của số cổ đã bán
+        /// </summary>
+        public decimal SellInterestPercent { get; set; }
     }
 }

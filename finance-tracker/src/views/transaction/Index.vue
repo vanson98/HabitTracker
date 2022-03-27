@@ -42,11 +42,7 @@
         <el-table-column label="Tổng tiền">
           <template #default="scope">
             <span>
-              {{
-                util.formatCurrency(
-                  scope.row.numberOfShares * scope.row.price * 1000,
-                )
-              }}
+              {{ (scope.row.numberOfShares * scope.row.price).toFixed(3) }}
             </span>
           </template>
         </el-table-column>
@@ -59,7 +55,7 @@
         </el-table-column>
         <el-table-column label="Tổng phí">
           <template #default="scope">
-            <span>{{ util.formatCurrency(scope.row.totalFee * 1000) }}</span>
+            <span>{{ scope.row.totalFee }}</span>
           </template>
         </el-table-column>
         <el-table-column label="Action" :align="'center'" width="180">

@@ -1668,8 +1668,8 @@ namespace HabitTracker.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("MarketPrice")
-                        .HasColumnType("real");
+                    b.Property<decimal>("MarketPrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -1677,20 +1677,20 @@ namespace HabitTracker.Migrations
                     b.Property<string>("StockCode")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("TotalAmountBuy")
-                        .HasColumnType("bigint");
+                    b.Property<decimal>("TotalAmountBuy")
+                        .HasColumnType("decimal(20,0)");
 
-                    b.Property<long>("TotalAmountSell")
-                        .HasColumnType("bigint");
+                    b.Property<decimal>("TotalAmountSell")
+                        .HasColumnType("decimal(20,0)");
 
-                    b.Property<float>("TotalMoneyBuy")
-                        .HasColumnType("real");
+                    b.Property<decimal>("TotalMoneyBuy")
+                        .HasColumnType("decimal(18,5)");
 
-                    b.Property<float>("TotalMoneySell")
-                        .HasColumnType("real");
+                    b.Property<decimal>("TotalMoneySell")
+                        .HasColumnType("decimal(18,5)");
 
-                    b.Property<long>("Vol")
-                        .HasColumnType("bigint");
+                    b.Property<decimal>("Vol")
+                        .HasColumnType("decimal(20,0)");
 
                     b.HasKey("Id");
 
@@ -1706,8 +1706,8 @@ namespace HabitTracker.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<float>("BuyFee")
-                        .HasColumnType("real");
+                    b.Property<decimal>("BuyFee")
+                        .HasColumnType("decimal(18,8)");
 
                     b.Property<string>("ChangnelName")
                         .HasColumnType("nvarchar(max)");
@@ -1715,23 +1715,23 @@ namespace HabitTracker.Migrations
                     b.Property<string>("ChannelCode")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("MoneyInput")
-                        .HasColumnType("real");
+                    b.Property<decimal>("MoneyInput")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<float>("MoneyOutput")
-                        .HasColumnType("real");
+                    b.Property<decimal>("MoneyOutput")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<float>("MoneyStock")
-                        .HasColumnType("real");
+                    b.Property<decimal>("MoneyStock")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<float>("SellFee")
-                        .HasColumnType("real");
+                    b.Property<decimal>("SellFee")
+                        .HasColumnType("decimal(18,8)");
 
-                    b.Property<float>("TotalBuyFee")
-                        .HasColumnType("real");
+                    b.Property<decimal>("TotalBuyFee")
+                        .HasColumnType("decimal(18,5)");
 
-                    b.Property<float>("TotalSellFee")
-                        .HasColumnType("real");
+                    b.Property<decimal>("TotalSellFee")
+                        .HasColumnType("decimal(18,5)");
 
                     b.HasKey("Id");
 
@@ -1744,6 +1744,9 @@ namespace HabitTracker.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<decimal>("CapitalCost")
+                        .HasColumnType("decimal(18,5)");
 
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("datetime2");
@@ -1760,14 +1763,14 @@ namespace HabitTracker.Migrations
                     b.Property<long?>("LastModifierUserId")
                         .HasColumnType("bigint");
 
-                    b.Property<int>("NumberOfShares")
-                        .HasColumnType("int");
+                    b.Property<decimal>("NumberOfShares")
+                        .HasColumnType("decimal(20,0)");
 
-                    b.Property<float>("Price")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<float>("TotalFee")
-                        .HasColumnType("real");
+                    b.Property<decimal>("TotalFee")
+                        .HasColumnType("decimal(18,5)");
 
                     b.Property<DateTime>("TransactionTime")
                         .HasColumnType("datetime2");

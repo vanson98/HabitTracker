@@ -13,6 +13,9 @@ namespace HabitTracker.Investing.Dtos.InvestmentDtos
     [AutoMapFrom(typeof(Investment))]
     public class InvestmentDto : EntityDto<int>
     {
+        /// <summary>
+        /// Mã cổ phiếu
+        /// </summary>
         public string StockCode { get; set; }
 
         /// <summary>
@@ -23,37 +26,37 @@ namespace HabitTracker.Investing.Dtos.InvestmentDtos
         /// <summary>
         /// Tổng số lượng cổ mua
         /// </summary>
-        public long TotalAmountBuy { get; set; }
+        public ulong TotalAmountBuy { get; set; }
 
         /// <summary>
         /// Tổng số tiền mua
         /// </summary>
-        public float TotalMoneyBuy { get; set; }
+        public decimal TotalMoneyBuy { get; set; }
 
         /// <summary>
-        /// Giá vốn
+        /// Giá trung bình mỗi CP
         /// </summary>
         public decimal CapitalCost { get; set; }
 
         /// <summary>
-        /// Giá cố phiếu hiện tại
+        /// Giá hiện tại
         /// </summary>
-        public float MarketPrice { get; set; }
+        public decimal MarketPrice { get; set; }
 
         /// <summary>
         /// Tổng số lượng bán
         /// </summary>
-        public long TotalAmountSell { get; set; }
+        public ulong TotalAmountSell { get; set; }
 
         /// <summary>
         /// Tổng số tiền bán
         /// </summary>
-        public float TotalMoneySell { get; set; }
+        public decimal TotalMoneySell { get; set; }
 
         /// <summary>
         /// Khối lượng cổ phiếu hiện thời
         /// </summary>
-        public long Vol { get; set; }
+        public ulong Vol { get; set; }
 
         /// <summary>
         /// Mô tả 

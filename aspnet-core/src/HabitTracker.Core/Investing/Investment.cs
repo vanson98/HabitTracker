@@ -20,12 +20,13 @@ namespace HabitTracker.Investing
         /// <summary>
         /// Tổng số lượng cổ mua
         /// </summary>
-        public long TotalAmountBuy { get; set; }
+        public ulong TotalAmountBuy { get; set; }
 
         /// <summary>
         /// Tổng số tiền mua
         /// </summary>
-        public float TotalMoneyBuy { get; set; }
+        [Column(TypeName = "decimal(18,5)")]
+        public decimal TotalMoneyBuy { get; set; }
 
         /// <summary>
         /// Giá trung bình mỗi CP
@@ -36,22 +37,23 @@ namespace HabitTracker.Investing
         /// <summary>
         /// Giá hiện tại
         /// </summary>
-        public float MarketPrice { get; set; }
+        public decimal MarketPrice { get; set; }
 
         /// <summary>
         /// Tổng số lượng bán
         /// </summary>
-        public long TotalAmountSell { get; set; }
+        public ulong TotalAmountSell { get; set; }
 
         /// <summary>
         /// Tổng số tiền bán
         /// </summary>
-        public float TotalMoneySell { get; set; }
+        [Column(TypeName = "decimal(18,5)")]
+        public decimal TotalMoneySell { get; set; }
 
         /// <summary>
         /// Khối lượng cổ phiếu hiện thời
         /// </summary>
-        public long Vol { get; set; }
+        public ulong Vol { get; set; }
 
         /// <summary>
         /// Mô tả 

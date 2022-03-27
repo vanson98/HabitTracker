@@ -72,7 +72,11 @@
       </div>
       <div>
         <p>Thành tiền: {{ totalAmount }}</p>
-        <p>Tổng phí: {{ totalFee }}</p>
+        <div>
+          <span>Tổng phí tự nhập (x1000đ):</span>
+          <el-input v-model="transaction.totalFee" type="number"> </el-input>
+          <span> Tổng phí (máy tính): {{ totalFee }} </span>
+        </div>
       </div>
     </div>
     <template #footer>
@@ -114,7 +118,7 @@ let transactionTypeEnumKey = util.getEnumKeys(transactionType);
 let transaction = ref<TransactionDto>({
   transactionTime: new Date(),
   transactionType: transactionType.BUY,
-  totalFee: 0,
+  totalFee: -1,
   numberOfShares: 0,
   price: 0,
 });
@@ -169,7 +173,7 @@ onUpdated(() => {
     transaction.value = {
       transactionTime: new Date(),
       transactionType: transactionType.BUY,
-      totalFee: 0,
+      totalFee: -1,
     };
   }
 });

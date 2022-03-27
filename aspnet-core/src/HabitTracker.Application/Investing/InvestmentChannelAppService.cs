@@ -36,7 +36,7 @@ namespace HabitTracker.Investing
             }).ToListAsync();
         }
 
-        public async Task<InvestmentChannelDto> AddMoneyInput(string channelCode,float income)
+        public async Task<InvestmentChannelDto> AddMoneyInput(string channelCode,decimal income)
         {
             var channel = await _repository.FirstOrDefaultAsync(ivt => ivt.ChannelCode == channelCode);
             if(channel== null)
@@ -48,7 +48,7 @@ namespace HabitTracker.Investing
             return MapToEntityDto(await _repository.UpdateAsync(channel));
         }
 
-        public async Task<InvestmentChannelDto> WithdrawMoney(string channelCode, float value)
+        public async Task<InvestmentChannelDto> WithdrawMoney(string channelCode, decimal value)
         {
             var channel = await _repository.FirstOrDefaultAsync(ivt => ivt.ChannelCode == channelCode);
 
@@ -74,10 +74,10 @@ namespace HabitTracker.Investing
                 var listActiveInvestment = await _investmentRepository
                     .GetAll()
                     .Where(ivm => ivm.Status == Enum.InvestmentStatus.Active && ivm.ChannelId == channelInfo.Id)
-                    .Select(ivm => new { Vol = ivm.Vol, CapitalCost = ivm.CapitalCost, MarketPrice = ivm.MarketPrice })
+                    .Select(ivm => new { Vol = ivm.Vol, TotalMoneyBuy = ivm.TotalMoneyBuy, MarketPrice = ivm.MarketPrice })
                     .ToListAsync();
                 ivmChannelOverview.MarketValueOfStocks = listActiveInvestment.Sum(ivm => ivm.MarketPrice * ivm.Vol);
-                ivmChannelOverview.ValueOfStocks = (float)listActiveInvestment.Sum(ivm => ivm.CapitalCost * ivm.Vol);
+                ivmChannelOverview.ValueOfStocks = listActiveInvestment.Sum(ivm => ivm.TotalMoneyBuy);
                 ivmChannelOverview.NAV = ivmChannelOverview.MarketValueOfStocks + ivmChannelOverview.MoneyStock;
                 return ivmChannelOverview;
             }
@@ -87,7 +87,7 @@ namespace HabitTracker.Investing
             }
         }
 
-        public async Task<InvestmentChannelDto> UpdateFee(int channelId,string type, float value)
+        public async Task<InvestmentChannelDto> UpdateFee(int channelId,string type, decimal value)
         {
             var investmentChannel = await _repository.FirstOrDefaultAsync(channelId);
             if(investmentChannel!= null)

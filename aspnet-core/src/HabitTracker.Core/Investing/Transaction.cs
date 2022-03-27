@@ -11,12 +11,12 @@ namespace HabitTracker.Investing
         /// <summary>
         /// Giá giao dịch trên một cố phiếu (mua/bán)
         /// </summary>
-        public float Price { get; set; }
+        public decimal Price { get; set; }
 
         /// <summary>
         ///  Số lượng cổ phiếu
         /// </summary>
-        public int NumberOfShares { get; set; }
+        public ulong NumberOfShares { get; set; }
 
         /// <summary>
         ///  Ngày giao dịch
@@ -56,7 +56,14 @@ namespace HabitTracker.Investing
         /// <summary>
         /// Tổng tiền phí
         /// </summary>
-        public float TotalFee { get; set; }
+        [Column(TypeName = "decimal(18,5)")]
+        public decimal TotalFee { get; set; }
+
+        /// <summary>
+        /// Giá vốn lúc bán CP
+        /// </summary>
+        [Column(TypeName = "decimal(18,5)")]
+        public decimal CapitalCost { get; set; }
 
         [ForeignKey("InvestmentId")]
         public Investment Investment { get; set; }

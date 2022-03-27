@@ -72,18 +72,23 @@ namespace HabitTracker.Investing
             // Đơn giá giao dịch
             var amount = (transaction.NumberOfShares * transaction.Price);
             //  Phí GD
-            var fee = transaction.TransactionType == TransactionType.BUY ? investmentChannel.BuyFee : investmentChannel.SellFee;
-            transaction.TotalFee = amount * fee / 100;
+            if (transaction.TotalFee <= 0)
+            {
+                var fee = transaction.TransactionType == TransactionType.BUY ? investmentChannel.BuyFee : investmentChannel.SellFee;
+                transaction.TotalFee = amount * fee / 100;
+            }
 
             // Cập nhật thông tin investment
             if (investment != null && transaction.TransactionType == TransactionType.BUY)
             {
                 if((transaction.TotalFee + amount) < investmentChannel.MoneyStock)
                 {
+                    var newVol = investment.Vol + transaction.NumberOfShares;
                     investment.TotalAmountBuy += transaction.NumberOfShares;
-                    investment.TotalMoneyBuy += (transaction.NumberOfShares * transaction.Price);
-                    investment.Vol += transaction.NumberOfShares;
-                    investment.CapitalCost = (decimal)(investment.TotalMoneyBuy / investment.TotalAmountBuy);
+                    investment.TotalMoneyBuy += amount;
+                    // Tính capital cost
+                    investment.CapitalCost = CalculateCapitalCost(amount, investment.Vol,investment.CapitalCost,newVol);
+                    investment.Vol = newVol;
                 }
                 else
                 {
@@ -96,7 +101,10 @@ namespace HabitTracker.Investing
                 {
                     investment.TotalAmountSell += transaction.NumberOfShares;
                     investment.TotalMoneySell += (transaction.NumberOfShares * transaction.Price);
+                   
                     investment.Vol -= transaction.NumberOfShares;
+                    transaction.CapitalCost = investment.CapitalCost;
+                    
                 }
                 else
                 {
@@ -132,8 +140,6 @@ namespace HabitTracker.Investing
             return await base.CreateAsync(transaction);
         }
 
-
-
         public async override Task DeleteAsync(EntityDto<int> input)
         {
             var transaction = await _repository.FirstOrDefaultAsync(input.Id);
@@ -145,8 +151,8 @@ namespace HabitTracker.Investing
             {
                 investment.TotalAmountBuy -= transaction.NumberOfShares;
                 investment.TotalMoneyBuy -= amount;
+                investment.CapitalCost = RevertBuyCapitalCost(investment.Vol,investment.CapitalCost,transaction.NumberOfShares,transaction.Price);
                 investment.Vol -= transaction.NumberOfShares;
-                investment.CapitalCost = investment.TotalAmountBuy == 0 ? 0 : (decimal)(investment.TotalMoneyBuy / investment.TotalAmountBuy);
             }
             else if (investment != null && transaction.TransactionType == TransactionType.SELL)
             {
@@ -154,8 +160,8 @@ namespace HabitTracker.Investing
                 investment.TotalMoneySell -= amount;
                 investment.TotalAmountBuy += transaction.NumberOfShares;
                 investment.TotalMoneyBuy += amount;
+                investment.CapitalCost = RevertSellCapitalCost(investment.Vol, investment.CapitalCost, transaction.NumberOfShares, transaction.CapitalCost);
                 investment.Vol += transaction.NumberOfShares;
-                investment.CapitalCost = (decimal)(investment.TotalMoneyBuy / investment.TotalAmountBuy);
             }
             // Cập nhật trạng thái
             if (investment.TotalAmountBuy == 0)
@@ -187,6 +193,28 @@ namespace HabitTracker.Investing
 
             await _investmentChannelRepository.UpdateAsync(investmentChannel);
             await base.DeleteAsync(input);
+        }
+
+        private decimal CalculateCapitalCost(decimal transactionAmount, ulong formerVol, decimal formerCapitalCost, ulong newVol)
+        {
+            return (transactionAmount + (formerVol * formerCapitalCost)) / newVol;
+        }
+
+        private decimal RevertBuyCapitalCost(ulong currentVol, decimal currentCapitalCost, ulong transactionVol, decimal transactionPrice)
+        {
+            if (currentVol == transactionVol)
+            {
+                return 0;
+            }
+            else
+            {
+                return ((currentVol * currentCapitalCost) - (transactionVol * transactionPrice)) / (currentVol - transactionVol);
+            }
+        }
+        
+        private decimal RevertSellCapitalCost(ulong currentVol, decimal currentCapitalCost, ulong transactionVol, decimal transactionCapitalCost)
+        {
+            return ((currentVol * currentCapitalCost) + (transactionVol * transactionCapitalCost)) / (currentVol + transactionVol);
         }
     }
 }

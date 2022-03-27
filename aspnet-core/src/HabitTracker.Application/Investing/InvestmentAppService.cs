@@ -44,7 +44,7 @@ namespace HabitTracker.Investing
                 .OrderByDescending(ivm => ivm.Id).Select((ivm) => new InvestmentSelectDto()
                 {
                     Id = ivm.Id,
-                    CompanyName = ivm.CompanyName,
+                    CompanyName = ivm.CompanyName == null ? "" : ivm.CompanyName,
                     StockCode = ivm.StockCode
                 }).ToList();
         }
@@ -68,9 +68,14 @@ namespace HabitTracker.Investing
                                      TotalMoneyBuy = ivm.TotalMoneyBuy,
                                      TotalMoneySell = ivm.TotalMoneySell,
                                      Vol = ivm.Vol,
-                                     CurrentInterest = ivm.CapitalCost > 0 ?
-                                        ((ivm.MarketPrice - (float)ivm.CapitalCost) / ivm.MarketPrice) : 0,
-                                     SellInterest = ivm.TotalAmountSell == 0 ? 0 : (ivm.TotalMoneySell - ivm.TotalMoneyBuy) / ivm.TotalMoneyBuy
+
+                                     GainLossPercent = ivm.CapitalCost > 0 ?
+                                        ((ivm.MarketPrice - ivm.CapitalCost) * 100 / ivm.CapitalCost) : 0,
+                                     GainLossValue = ((ivm.MarketPrice - ivm.CapitalCost) * ivm.Vol),
+                                     
+                                     SellInterest = ivm.Status == Enum.InvestmentStatus.BuyOut ? (ivm.TotalMoneySell - ivm.TotalMoneyBuy) : 0,
+                                     SellInterestPercent = ivm.Status == Enum.InvestmentStatus.BuyOut  ? (ivm.TotalMoneySell - ivm.TotalMoneyBuy) * 100 / ivm.TotalMoneySell : 0,
+                                     
                                  };
 
             var result = new PagedResultDto<InvestmentOverviewDto>()

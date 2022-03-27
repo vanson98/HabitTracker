@@ -23,12 +23,13 @@
         <el-table-column
           prop="totalAmountBuy"
           label="Amount Buy"
+          width="110"
         ></el-table-column>
-        <el-table-column prop="totalMoneyBuy" label="Money Bought">
+        <el-table-column prop="totalMoneyBuy" label="Money Bought (x1000)">
           <template #default="scope">
-            <span>{{
-              util.formatCurrency(scope.row.totalMoneyBuy * 1000)
-            }}</span>
+            <span>
+              {{ scope.row.totalMoneyBuy }}
+            </span>
           </template>
         </el-table-column>
         <el-table-column
@@ -37,9 +38,9 @@
           width="120"
           :class-name="'mid-col-highlight'"
         >
-          <template #default="scope">
-            {{ scope.row.capitalCost.toFixed(3) }}
-          </template>
+          <template #default="scope">{{
+            scope.row.capitalCost.toFixed(3)
+          }}</template>
         </el-table-column>
         <el-table-column
           prop="vol"
@@ -49,37 +50,56 @@
         ></el-table-column>
         <el-table-column
           label="Market Price"
-          width="120"
+          width="180"
           :class-name="'mid-col-highlight'"
         >
           <template #default="scope">
-            <span>{{ scope.row.marketPrice }} </span>
-            <span
-              v-if="scope.row.capitalCost > 0"
-              :class="{
-                interest: scope.row.currentInterest > 0,
-                loss: scope.row.currentInterest < 0,
-              }"
-            >
-              ({{
-                (
-                  ((scope.row.marketPrice - scope.row.capitalCost) * 100) /
-                  scope.row.capitalCost
-                ).toFixed(2)
-              }}%)</span
-            >
+            <div>
+              <div class="mk-p-ctn">
+                <span>{{ scope.row.marketPrice }}</span>
+                <span>
+                  {{ (scope.row.marketPrice * scope.row.vol).toFixed(3) }}
+                </span>
+              </div>
+              <div style="text-align: right">
+                <span
+                  :class="{
+                    interest: scope.row.gainLossPercent > 0,
+                    loss: scope.row.gainLossPercent < 0,
+                  }"
+                >
+                  {{ scope.row.gainLossValue.toFixed(2) }} ({{
+                    scope.row.gainLossPercent.toFixed(2)
+                  }}%)
+                </span>
+              </div>
+            </div>
           </template>
         </el-table-column>
         <el-table-column prop="totalMoneySell" label="Money Sold">
           <template #default="scope">
-            <span>{{
-              util.formatCurrency(scope.row.totalMoneySell * 1000)
-            }}</span>
+            <span>
+              {{ scope.row.totalMoneySell }}
+            </span>
+            <div>
+              <span
+                v-if="scope.row.status == InvestmentStatus.BuyOut"
+                :class="{
+                  interest: scope.row.sellInterest > 0,
+                  loss: scope.row.sellInterest < 0,
+                }"
+              >
+                {{ scope.row.sellInterest }} ({{
+                  scope.row.sellInterestPercent.toFixed(2)
+                }}%)
+              </span>
+            </div>
           </template>
         </el-table-column>
         <el-table-column
           prop="totalAmountSell"
           label="Amount Sell"
+          width="110"
         ></el-table-column>
         <el-table-column prop="status" label="Status" width="80">
           <template #default="scope">
@@ -164,7 +184,6 @@ const emits = defineEmits(["onInvestmentPageChange", "onListInvestmentChange"]);
 let currentPage = ref(1);
 let isOpenDialog = ref(false);
 let editInvestmentId = ref<number | null>(null);
-
 //method
 const pageChange = (page: number) => {
   currentPage.value = page;
@@ -235,5 +254,9 @@ const closeDialog = (isSuccess: boolean) => {
 .interest {
   color: #01c801;
   font-weight: 600;
+}
+.mk-p-ctn {
+  display: flex;
+  justify-content: space-between;
 }
 </style>
