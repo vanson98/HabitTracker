@@ -49,7 +49,7 @@
         <el-table-column label="Thời gian giao dịch">
           <template #default="scope">
             <span>{{
-              moment(scope.row.transactionTime).format("DD/MM/yyyy")
+              moment.utc(scope.row.transactionTime).local().format("DD/MM/yyyy")
             }}</span>
           </template>
         </el-table-column>

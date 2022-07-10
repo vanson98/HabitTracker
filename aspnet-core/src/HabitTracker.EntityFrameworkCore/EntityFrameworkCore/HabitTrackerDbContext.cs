@@ -18,6 +18,7 @@ namespace HabitTracker.EntityFrameworkCore
         public DbSet<Investment> Investments { get; set; }
         public DbSet<InvestmentChannel> InvestmentChannels { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<MoneyTransfer> MoneyTransfers { get; set; }
         public HabitTrackerDbContext(DbContextOptions<HabitTrackerDbContext> options)
             : base(options)
         {

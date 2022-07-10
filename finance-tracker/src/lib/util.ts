@@ -19,11 +19,24 @@ const util = {
     }
     return null;
   },
-  formatCurrency(input: number) : string {
-    return input.toLocaleString('vi', { style: 'currency', currency: 'VND',maximumFractionDigits: 2 })
+  formatCurrency(input: number): string {
+    return input.toLocaleString("vi", {
+      style: "currency",
+      currency: "VND",
+      maximumFractionDigits: 2,
+    });
   },
-  getEnumKeys(input: object): string[]{
+  formatCurrencyNoSymbol(input: number): string {
+    return input
+      .toLocaleString("vi", {
+        style: "currency",
+        currency: "VND",
+        maximumFractionDigits: 3,
+      })
+      .slice(0, -1);
+  },
+  getEnumKeys(input: object): string[] {
     return Object.keys(input).filter((k) => isNaN(Number(k)));
-  }
+  },
 };
 export default util;

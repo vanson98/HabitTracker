@@ -1,4 +1,5 @@
 ﻿using HabitTracker.Investing.Dtos.InvestmentChannelDtos;
+using HabitTracker.Investing.Dtos.MoneyTransferDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,5 +15,7 @@ namespace HabitTracker.Investing.Interface
         public Task<InvestmentChannelDto> WithdrawMoney(string channelCode, decimal value);
         public Task<InvestmentChannelDto> UpdateFee(int channelId, string type,decimal value); 
         public Task<InvestmentChannelOverviewDto> GetChannelOverview(int id);
+        Task<List<MoneyTransferDto>> GetAllMoneyTransfer(SearchMoneyTransferDto input);
+        Task<InvestmentChannelDto> DeleteMoneyTransferTransaction(int transactionId, int channelId);
     }
 }

@@ -19,7 +19,6 @@ ajax.get("/AbpUserConfiguration/GetAll").then((res) => {
     },
     async mounted() {
       const sessionStore = appStore();
-      debugger;
       const res = await authService.getUserInfo();
       const userInfo = res.data.result.user;
       if (userInfo != null) {

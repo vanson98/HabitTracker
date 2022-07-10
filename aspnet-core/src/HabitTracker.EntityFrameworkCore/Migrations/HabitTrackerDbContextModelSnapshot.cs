@@ -1738,6 +1738,35 @@ namespace HabitTracker.Migrations
                     b.ToTable("InvestmentChannels");
                 });
 
+            modelBuilder.Entity("HabitTracker.Investing.MoneyTransfer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,8)");
+
+                    b.Property<int>("ChannelId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("TransferType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChannelId");
+
+                    b.ToTable("MoneyTransfers");
+                });
+
             modelBuilder.Entity("HabitTracker.Investing.Transaction", b =>
                 {
                     b.Property<int>("Id")
@@ -2095,6 +2124,17 @@ namespace HabitTracker.Migrations
                         .IsRequired();
 
                     b.Navigation("InvestmentChannel");
+                });
+
+            modelBuilder.Entity("HabitTracker.Investing.MoneyTransfer", b =>
+                {
+                    b.HasOne("HabitTracker.Investing.InvestmentChannel", "Channel")
+                        .WithMany()
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Channel");
                 });
 
             modelBuilder.Entity("HabitTracker.Investing.Transaction", b =>

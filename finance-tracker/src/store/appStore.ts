@@ -7,7 +7,18 @@ export const appStore = defineStore("appStore", {
   state: () => ({
     userInfo: {} as UserModel,
     listPermision: [] as Array<PermissionModel>,
-    channel: {} as InvestmentChannelOverviewDto,
+    channel: {
+      buyFee: 0,
+      marketValueOfStocks: 0,
+      moneyInput: 0,
+      moneyOutput: 0,
+      totalBuyFee: 0,
+      totalSellFee: 0,
+      moneyStock: 0,
+      nav: 0,
+      sellFee: 0,
+      valueOfStocks: 0,
+    } as InvestmentChannelOverviewDto,
   }),
   getters: {
     getUserInfo(state) {

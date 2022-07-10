@@ -57,30 +57,32 @@
         <tr>
           <td>Tổng tiền nhập vào</td>
           <td class="float-right">
-            {{ channel.moneyInput }}
+            {{ util.formatCurrencyNoSymbol(channel.moneyInput) }}
           </td>
           <td style="padding-left: 20px">Tiền mặt thực có</td>
           <td class="float-right">
-            {{ channel.moneyStock }}
+            {{ util.formatCurrencyNoSymbol(channel.moneyStock) }}
           </td>
           <td style="padding-left: 20px">Tổng tiền rút ra</td>
           <td class="float-right">
-            {{ channel.moneyOutput }}
+            {{ util.formatCurrencyNoSymbol(channel.moneyOutput) }}
           </td>
         </tr>
         <tr>
           <td>Tông giá giá trị CP (lúc mua)</td>
           <td class="float-right">
-            {{ channel.valueOfStocks.toFixed(3) }}
+            {{ util.formatCurrencyNoSymbol(channel.valueOfStocks) }}
           </td>
           <td style="padding-left: 20px">Tống giá trị thị trường (hiện tại)</td>
           <td class="float-right">
-            {{ channel.marketValueOfStocks.toFixed(3) }}
+            {{ util.formatCurrencyNoSymbol(channel.marketValueOfStocks) }}
           </td>
           <td style="padding-left: 20px">Lãi/lỗ</td>
           <td style="padding-left: 20px" class="float-right">
             {{
-              (channel.marketValueOfStocks - channel.valueOfStocks).toFixed(3)
+              util.formatCurrencyNoSymbol(
+                channel.marketValueOfStocks - channel.valueOfStocks,
+              )
             }}
             <span v-if="channel.valueOfStocks > 0">
               - ({{
@@ -96,12 +98,12 @@
         <tr>
           <td>Tài sản ròng (NAV)</td>
           <td class="float-right">
-            {{ channel.nav.toFixed(3) }}
+            {{ util.formatCurrencyNoSymbol(channel.nav) }}
           </td>
           <td style="padding-left: 20px">Tổng phí mua / bán</td>
           <td class="float-right">
-            {{ channel.totalBuyFee }} |
-            {{ channel.totalSellFee }}
+            {{ util.formatCurrencyNoSymbol(channel.totalBuyFee) }} |
+            {{ util.formatCurrencyNoSymbol(channel.totalSellFee) }}
           </td>
           <td style="padding-left: 20px">Phí mua / bán</td>
           <td class="float-right">
