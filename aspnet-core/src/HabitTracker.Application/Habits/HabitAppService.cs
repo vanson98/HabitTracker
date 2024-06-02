@@ -73,7 +73,7 @@ namespace HabitTracker.Habits
 
             // Check exist log
             var logInDay = await _habitLogRepository.GetAll()
-                .Where(hl => hl.DateLog.Date == input.DateLog.Date && hl.HabitId == habit.Id)
+                .Where(hl => hl.DateLog.Date == input.DateLog.Date.ToLocalTime() && hl.HabitId == habit.Id)
                 .FirstOrDefaultAsync();
 
             if (logInDay != null)
@@ -101,7 +101,7 @@ namespace HabitTracker.Habits
                 {
                     HabitId = input.HabitId,
                     TimeLog = input.TimeLog,
-                    DateLog = input.DateLog
+                    DateLog = input.DateLog.ToLocalTime(),
                 };
                 // Check type log
                 if (habit.HabitLogType == HabitLogType.ByGoalTime)
